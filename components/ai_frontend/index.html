@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin:0; padding:0; width:100%; height:100%; background:transparent; overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  #fab { position:absolute; right:0; bottom:0; width:56px; height:56px; border-radius:50%;
+    background:linear-gradient(135deg,#0a84ff,#0066d6); color:#fff; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:600;
+    box-shadow:0 6px 24px rgba(10,132,255,.45); transition:transform .15s ease; user-select:none;
+    touch-action:none; -webkit-user-drag:none; }
+  #fab:hover { transform:scale(1.06); }
+  #drawer { display:none; position:absolute; inset:0; flex-direction:column;
+    background:rgba(28,28,30,.98); border:1px solid #38383a; border-radius:18px; overflow:hidden;
+    box-shadow:0 16px 60px rgba(0,0,0,.55); }
+  #drawer.open { display:flex; }
+  .top { display:flex; align-items:center; gap:8px; padding:14px 16px 12px; border-bottom:1px solid #38383a; }
+  .title { flex:1; min-width:0; }
+  .title b { display:block; font-size:15px; color:#f5f5f7; font-weight:600; letter-spacing:-.01em; }
+  .title span { display:block; font-size:11px; color:#98989d; margin-top:2px; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; }
+  .tbtn { height:34px; border-radius:50%; background:transparent; border:1px solid #38383a;
+    color:#98989d; font-size:13px; cursor:pointer; display:flex; align-items:center;
+    justify-content:center; transition:border-color .15s,color .15s; user-select:none; }
+  .tbtn.clear { width:auto; padding:0 10px; border-radius:10px; font-size:11px; font-weight:500; }
+  #btn-mini { width:34px; flex-shrink:0; }
+  #btn-restore { display:none; }
+  #drawer.mini #btn-mini, #drawer.mini #btn-threads, #drawer.mini #btn-back,
+  #drawer.mini #btn-clear { display:none; }
+  #drawer.mini #btn-restore { display:flex; }
+  #drawer.mini #t-model { display:none; }
+  #drawer.mini .top { height:48px; padding:0 12px; border-bottom:none; }
+  #drawer.mini .quick, #drawer.mini .input, #drawer.mini #threads { display:none; }
+  .tbtn:hover { border-color:#0a84ff; color:#0a84ff; }
+  .tbtn.close:hover { border-color:#ff3b30; color:#ff3b30; }
+  .body { flex:1; overflow:hidden; position:relative; }
+  .quick { position:absolute; left:14px; right:14px; bottom:12px; display:grid;
+    grid-template-columns:1fr 1fr; gap:8px; }
+  .quick.hidden { display:none; }
+  .quick button { height:32px; border-radius:16px; background:#2c2c2e; border:1px solid #38383a;
+    color:#98989d; font-size:11px; font-weight:500; cursor:pointer; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; padding:0 10px; transition:border-color .15s,color .15s; }
+  .quick button:hover { border-color:#0a84ff; color:#0a84ff; }
+  .quick button.deep { background:rgba(10,132,255,.14); border-color:rgba(10,132,255,.5);
+    color:#0a84ff; font-weight:600; grid-column:1 / -1; }
+  .quick button.deep:hover { background:rgba(10,132,255,.24); }
+  .input { display:flex; gap:8px; padding:12px 14px; border-top:1px solid #38383a; }
+  .input input { flex:1; height:40px; border-radius:20px; background:#2c2c2e; border:1px solid #38383a;
+    color:#f5f5f7; font-size:13px; padding:0 16px; outline:none; transition:border-color .15s; }
+  .input input::placeholder { color:#6e6e73; }
+  .input input:focus { border-color:#0a84ff; }
+  .input button { width:44px; height:40px; border-radius:20px; background:#0a84ff; color:#fff; border:none;
+    font-size:12px; font-weight:600; cursor:pointer; transition:background .15s; user-select:none; }
+  .input button:hover { background:#409cff; }
+
+  /* ── 话题面板（V3.2.2b）── */
+  #btn-threads, #btn-back { width:34px; flex-shrink:0; }
+  #btn-back { display:none; }
+  #drawer.threads-mode #btn-threads { display:none; }
+  #drawer.threads-mode #btn-back { display:flex; }
+  #drawer.threads-mode #btn-clear { display:none; }
+  #drawer.threads-mode #t-model { display:none; }
+  #drawer.threads-mode .quick, #drawer.threads-mode .input { display:none; }
+  #threads { display:none; position:absolute; inset:0; flex-direction:column; padding:12px 10px 10px; gap:8px; }
+  #drawer.threads-mode #threads { display:flex; }
+  .new-chat { height:40px; border-radius:12px; background:rgba(10,132,255,.12); border:1px solid rgba(10,132,255,.35);
+    color:#0a84ff; font-size:13px; font-weight:600; cursor:pointer; flex-shrink:0;
+    transition:background .15s; user-select:none; }
+  .new-chat:hover { background:rgba(10,132,255,.22); }
+  .thread-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:2px;
+    scrollbar-width:thin; scrollbar-color:#38383a transparent; }
+  .thread-list::-webkit-scrollbar { width:5px; }
+  .thread-list::-webkit-scrollbar-thumb { background:#38383a; border-radius:3px; }
+  .thread-row { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; cursor:pointer;
+    border:1px solid transparent; transition:background .15s; user-select:none; }
+  .thread-row:hover { background:#2c2c2e; }
+  .thread-row.active { background:rgba(10,132,255,.12); border-color:rgba(10,132,255,.25); }
+  .trow-main { flex:1; min-width:0; }
+  .trow-title { font-size:13px; color:#f5f5f7; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .trow-meta { font-size:11px; color:#98989d; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .trow-del { flex-shrink:0; height:26px; padding:0 9px; border-radius:8px; background:transparent; border:1px solid #38383a;
+    color:#98989d; font-size:11px; cursor:pointer; opacity:0;
+    transition:opacity .15s,color .15s,border-color .15s,background .15s; user-select:none; }
+  .thread-row:hover .trow-del, .thread-row.active .trow-del { opacity:1; }
+  .trow-del:hover { border-color:#ff3b30; color:#ff453a; }
+  .trow-del.confirm { opacity:1; background:rgba(255,59,48,.12); border-color:rgba(255,59,48,.4); color:#ff453a; }
+  .thread-empty { font-size:12px; color:#6e6e73; text-align:center; padding:28px 0; }
+</style>
+</head>
+<body>
+<button id="fab">AI</button>
+<div id="drawer">
+  <div class="top">
+    <button id="btn-threads" class="tbtn" title="Threads">&#9776;</button>
+    <button id="btn-back" class="tbtn" title="Back">&#8592;</button>
+    <div class="title"><b id="t-title">AI 助手</b><span id="t-model"></span></div>
+    <button id="btn-mini" class="tbtn" title="Minimize">&#8211;</button>
+    <button id="btn-restore" class="tbtn clear">展开</button>
+    <button id="btn-clear" class="tbtn clear">清空</button>
+    <button id="btn-close" class="tbtn close">&#10005;</button>
+  </div>
+  <div class="body">
+    <div id="quick" class="quick hidden"></div>
+    <div id="threads">
+      <button id="btn-new" class="new-chat">+ New Chat</button>
+      <div id="thread-list" class="thread-list"></div>
+    </div>
+  </div>
+  <div class="input">
+    <input id="inp" placeholder="输入金融问题…" autocomplete="off">
+    <button id="btn-send">发送</button>
+  </div>
+</div>
+<script>
+  // ── 与 Streamlit 通信（自定义组件协议 v1）──
+  function ready() {
+    window.parent.postMessage({
+      isStreamlitMessage: true,
+      type: "streamlit:componentReady",
+      apiVersion: 1
+    }, "*");
+  }
+  ready();
+
+  // 初始 iframe 高度（定位由下方 layout() 接管，这里仅保证组件有最小高度）
+  window.parent.postMessage({
+    isStreamlitMessage: true,
+    type: "streamlit:setFrameHeight",
+    height: 560
+  }, "*");
+
+  function setValue(v) {
+    window.parent.postMessage({
+      isStreamlitMessage: true,
+      type: "streamlit:setComponentValue",
+      value: v
+    }, "*");
+  }
+
+  // ── 几何常量（必须与 components/chat.py 保持一致）──
+  // 固定右下角布局：所有定位用 right/bottom/calc/min 表达式，
+  // 窗口缩放时自动跟随，无需监听 resize。
+  var G = {
+    FAB: 56,                    // AI 球尺寸
+    W: 460, HMAX: 640,          // 抽屉宽度 / 最大高度
+    R: 24, B: 56,               // 右下角间距（球离底部稍远，视觉更协调）
+    PAD: 16, TOP: 62, IN: 62,   // 消息区内边距 / 顶栏高 / 输入条高
+    MINI_H: 48,                 // 最小化后抽屉高度
+    Z_IFRAME: 9500, Z_MSGS: 9600,
+    H_EXPR: "min(640px, calc(100vh - 112px))",
+    MSGS_TOP: "calc(100vh - 56px - min(640px, calc(100vh - 112px)) + 62px)"
+  };
+
+  var drawerEl = document.getElementById("drawer");
+  var fabEl = document.getElementById("fab");
+  var quickEl = document.getElementById("quick");
+  var threadListEl = document.getElementById("thread-list");
+  var drawerInited = false;
+  var threadsMode = false;
+  var miniMode = false;
+  var quickVisible = false;
+  var chatTitle = "AI Assistant";
+  var threadsTitle = "Threads";
+  var lastThreadsJson = "";
+  var confirmDelId = null;
+  var confirmDelTimer = null;
+  var deleteLabel = "Delete";
+  var deleteConfirmLabel = "Confirm?";
+  var syncTimer = null;
+  var msgsObserver = null;
+
+  function ifrEl() { return window.frameElement; }
+
+  function setIfr(style) {
+    var ifr = ifrEl();
+    if (!ifr) return;
+    for (var k in style) {
+      ifr.style.setProperty(k, style[k], "important");
+    }
+  }
+
+  // ── 定位：固定右下角（JS 内联 !important 为权威，Python CSS 兜底同值）──
+  function layout() {
+    var open = drawerEl.classList.contains("open");
+    if (open) {
+      var h = miniMode ? G.MINI_H + "px" : G.H_EXPR;
+      setIfr({ position: "fixed", right: G.R + "px", bottom: G.B + "px",
+               left: "auto", top: "auto",
+               width: G.W + "px", height: h,
+               "z-index": G.Z_IFRAME });
+    } else {
+      setIfr({ position: "fixed", right: G.R + "px", bottom: G.B + "px",
+               left: "auto", top: "auto",
+               width: G.FAB + "px", height: G.FAB + "px",
+               "z-index": G.Z_IFRAME });
+    }
+    positionMsgs();
+  }
+
+  // 把 Python 渲染的消息浮层对齐到抽屉的正文区域（顶栏下 → 输入条上）
+  function positionMsgs() {
+    var doc = window.parent && window.parent.document;
+    if (!doc) return;
+    var msgs = doc.getElementById("chat-msgs");
+    if (!msgs) return;
+    // 抽屉收起 / 最小化时立即隐藏消息层（不等 Python rerun，避免残留闪烁）
+    if (!drawerEl.classList.contains("open") || miniMode) {
+      msgs.style.setProperty("display", "none", "important");
+      return;
+    }
+    msgs.style.setProperty("display", "", "important");
+    msgs.style.setProperty("position", "fixed", "important");
+    msgs.style.setProperty("right", (G.R + G.PAD) + "px", "important");
+    msgs.style.setProperty("width", (G.W - 2 * G.PAD) + "px", "important");
+    msgs.style.setProperty("top", G.MSGS_TOP, "important");
+    // 消息区底部让位给快捷按钮区（深度分析常驻，概念按钮仅空会话显示），
+    // 否则 #chat-msgs（z-index 更高）会盖住 iframe 里的快捷按钮
+    var QUICK_FULL = 112, QUICK_DEEP = 32;
+    var qh = quickVisible ? QUICK_FULL : QUICK_DEEP;
+    msgs.style.setProperty("bottom", (G.B + G.IN + 12 + qh + 4) + "px", "important");
+    msgs.style.setProperty("left", "auto", "important");
+    msgs.style.setProperty("z-index", String(G.Z_MSGS), "important");
+  }
+
+  // 监听父页面：消息区每次被 Python 重绘后自动重新对齐
+  (function observeMsgs() {
+    var doc = window.parent && window.parent.document;
+    if (!doc || typeof MutationObserver === "undefined") return;
+    try {
+      msgsObserver = new MutationObserver(function () {
+        if (drawerEl.classList.contains("open")) positionMsgs();
+      });
+      msgsObserver.observe(doc.body, { childList: true, subtree: true });
+    } catch (e) {}
+  })();
+
+  // AI 球固定右下角：单击打开聊天框（原生 click，最可靠）
+  fabEl.addEventListener("click", function () {
+    openDrawer();
+  });
+
+  // ── 开合：JS 直接设置尺寸/位置，打开瞬间就是完整抽屉 ──
+  function setDrawerOpen(open) {
+    drawerEl.classList.toggle("open", open);
+    fabEl.style.display = open ? "none" : "flex";
+    // 关闭抽屉时退出迷你态：下次打开应为完整抽屉
+    if (!open) setMiniMode(false);
+    layout();
+    if (open) {
+      startSync();
+      setTimeout(function () {
+        var inp = document.getElementById("inp");
+        if (inp) inp.focus();
+      }, 60);
+    } else {
+      stopSync();
+    }
+  }
+  function openDrawer() {
+    setDrawerOpen(true);
+    setValue({ action: "toggle" });
+  }
+  function closeDrawer() {
+    setDrawerOpen(false);
+    setValue({ action: "close" });
+  }
+
+  // 迷你条：收起为一条窄栏（背景页面不受影响，V3.2.2d）
+  function setMiniMode(open) {
+    miniMode = !!open;
+    drawerEl.classList.toggle("mini", miniMode);
+    if (miniMode) setThreadsMode(false);
+    layout();
+  }
+
+  // ESC 关闭抽屉（主页面与 iframe 内均监听，保证焦点在背景时也能生效）
+  (function () {
+    var doc = window.parent && window.parent.document;
+    var onEsc = function (e) {
+      if (e.key === "Escape" && drawerEl.classList.contains("open")) closeDrawer();
+    };
+    if (doc) doc.addEventListener("keydown", onEsc);
+    window.addEventListener("keydown", onEsc);
+  })();
+
+  function requestFreshArgs() { ready(); }
+  function startSync() {
+    stopSync();
+    syncTimer = setInterval(requestFreshArgs, 2000);
+  }
+  function stopSync() {
+    if (syncTimer) { clearInterval(syncTimer); syncTimer = null; }
+  }
+
+  // 本地立即切换话题视图（不等 Python rerun，消除空白/影子）
+  function setThreadsMode(open) {
+    threadsMode = open;
+    drawerEl.classList.toggle("threads-mode", open);
+    // 顶栏标题本地立即跟随，无需等 args 同步
+    var t = document.getElementById("t-title");
+    if (open && threadsTitle) t.textContent = threadsTitle;
+    if (!open && chatTitle) t.textContent = chatTitle;
+  }
+
+  // ── 话题面板：渲染会话列表（仅内容变化时重建，避免打断悬停）──
+  function renderThreads(a) {
+    var qj = JSON.stringify({ t: a.threads || [], a: a.active_thread || "" });
+    if (qj === lastThreadsJson) return;
+    lastThreadsJson = qj;
+    threadListEl.innerHTML = "";
+    var list = a.threads || [];
+    if (!list.length) {
+      var em = document.createElement("div");
+      em.className = "thread-empty";
+      em.textContent = a.empty_label || "";
+      threadListEl.appendChild(em);
+      return;
+    }
+    list.forEach(function (th) {
+      var row = document.createElement("div");
+      row.className = "thread-row" + (th.id === a.active_thread ? " active" : "");
+      var main = document.createElement("div");
+      main.className = "trow-main";
+      var tt = document.createElement("div");
+      tt.className = "trow-title";
+      tt.textContent = th.title || "";
+      var tm = document.createElement("div");
+      tm.className = "trow-meta";
+      tm.textContent = th.meta || "";
+      main.appendChild(tt);
+      main.appendChild(tm);
+      var del = document.createElement("button");
+      del.className = "trow-del";
+      del.textContent = deleteLabel;
+      del.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        if (confirmDelId === th.id) {
+          confirmDelId = null;
+          if (confirmDelTimer) { clearTimeout(confirmDelTimer); confirmDelTimer = null; }
+          setValue({ action: "delete_session", session_id: th.id, ts: Date.now() });
+        } else {
+          confirmDelId = th.id;
+          resetDelButtons();
+          del.classList.add("confirm");
+          del.textContent = deleteConfirmLabel;
+          if (confirmDelTimer) { clearTimeout(confirmDelTimer); }
+          confirmDelTimer = setTimeout(function () {
+            confirmDelId = null;
+            confirmDelTimer = null;
+            resetDelButtons();
+          }, 3000);
+        }
+      });
+      row.appendChild(main);
+      row.appendChild(del);
+      row.addEventListener("click", function () {
+        setThreadsMode(false);
+        setValue({ action: "switch_session", session_id: th.id, ts: Date.now() });
+      });
+      threadListEl.appendChild(row);
+    });
+  }
+  function resetDelButtons() {
+    var btns = threadListEl.querySelectorAll(".trow-del");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.remove("confirm");
+      btns[i].textContent = deleteLabel;
+    }
+  }
+
+  // ── 渲染：接收 Python 传来的文案与状态 ──
+  function applyArgs(a) {
+    if (!a) return;
+    if (a.title !== undefined) {
+      // 只缓存两种标题；当前显示哪个由本地视图状态决定（避免旧参数把标题闪回错误值）
+      if (a.show_threads) threadsTitle = a.title; else chatTitle = a.title;
+    }
+    if (a.model !== undefined) document.getElementById("t-model").textContent = a.model;
+    if (a.placeholder) document.getElementById("inp").placeholder = a.placeholder;
+    if (a.send_label) document.getElementById("btn-send").textContent = a.send_label;
+    if (a.clear_label) document.getElementById("btn-clear").textContent = a.clear_label;
+    if (a.new_label) document.getElementById("btn-new").textContent = a.new_label;
+    if (a.delete_label) deleteLabel = a.delete_label;
+    if (a.delete_confirm_label) deleteConfirmLabel = a.delete_confirm_label;
+    if (a.restore_label) document.getElementById("btn-restore").textContent = a.restore_label;
+    if (a.mini_label) document.getElementById("btn-mini").title = a.mini_label;
+    // 快捷按钮每次重建：深度分析常驻（有历史也显示），
+    // 概念问题仅在空会话显示（show_quick）
+    quickEl.innerHTML = "";
+    var showConcepts = !!a.show_quick;
+    (a.quick_labels || []).forEach(function (q) {
+      var isDeep = q === (a.deep_quick_label || "");
+      if (!isDeep && !showConcepts) return;
+      var b = document.createElement("button");
+      b.textContent = q;
+      if (isDeep) b.className = "deep";
+      b.onclick = function () { sendText(q); };
+      quickEl.appendChild(b);
+    });
+    quickEl.classList.toggle("hidden", !(a.quick_labels || []).length);
+    renderThreads(a);
+    // 消息区让位高度依赖 quickVisible，必须在首次布局（layout）前确定
+    if (a.show_quick !== undefined) quickVisible = !!a.show_quick;
+    // 仅在首次初始化时按 Python 状态开合/校准（语言切换重挂载时生效；
+    // 常规 sync 不覆盖本地乐观切换，避免 args 滞后把面板闪退）
+    if (!drawerInited) {
+      drawerInited = true;
+      // 语言切换重挂载：按 Python 状态校准（迷你态在开合前设置，layout 幂等）
+      if (a.show_mini !== undefined) setMiniMode(!!a.show_mini);
+      if (a.show !== undefined) setDrawerOpen(!!a.show);
+      if (a.show_threads !== undefined) setThreadsMode(!!a.show_threads);
+    }
+  }
+
+  window.addEventListener("message", function (e) {
+    var d = e.data;
+    if (d && d.type === "streamlit:render") applyArgs(d.args);
+  });
+
+  // ── 交互：本地立即切换，再同步 Python ──
+  function sendText(t) {
+    if (!t) return;
+    quickEl.classList.add("hidden");
+    // ts：让每次发送的组件值都不同，避免 Python 端把相同文本的第二次发送
+    // 当成重复值丢弃（连续点同一个快捷问题）
+    setValue({ action: "send", text: t, ts: Date.now() });
+  }
+  function send() {
+    var el = document.getElementById("inp");
+    var t = el.value.trim();
+    if (!t) return;
+    el.value = "";
+    sendText(t);
+  }
+  // 打开话题面板瞬间先把消息浮层隐藏，避免旧消息盖在面板上（等 Python rerun 后彻底移除）
+  function hideMsgs() {
+    var doc = window.parent && window.parent.document;
+    var msgs = doc && doc.getElementById("chat-msgs");
+    if (msgs) msgs.style.setProperty("display", "none", "important");
+  }
+  document.getElementById("btn-threads").onclick = function () {
+    setThreadsMode(true);
+    hideMsgs();
+    setValue({ action: "toggle_threads", ts: Date.now() });
+  };
+  document.getElementById("btn-mini").onclick = function () {
+    setMiniMode(true);
+    setValue({ action: "mini", ts: Date.now() });
+  };
+  document.getElementById("btn-restore").onclick = function () {
+    setMiniMode(false);
+    setValue({ action: "mini", ts: Date.now() });
+  };
+  document.getElementById("btn-back").onclick = function () {
+    setThreadsMode(false);
+    setValue({ action: "toggle_threads", ts: Date.now() });
+  };
+  document.getElementById("btn-new").onclick = function () {
+    setThreadsMode(false);
+    setValue({ action: "new_chat", ts: Date.now() });
+  };
+  document.getElementById("btn-close").onclick = closeDrawer;
+  document.getElementById("btn-clear").onclick = function () {
+    quickEl.classList.remove("hidden");
+    setValue({ action: "clear", ts: Date.now() });
+  };
+  document.getElementById("btn-send").onclick = send;
+  document.getElementById("inp").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); send(); }
+  });
+
+  // 初始布局（脚本位于 body 末尾，DOM 已就绪）
+  layout();
+</script>
+</body>
+</html>

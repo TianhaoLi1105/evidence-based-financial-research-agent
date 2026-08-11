@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Local config (contains API key)
+.agent_config.json
+# Local cache (K-line data)
+.cache/
+
+
+# Local AI chat history (multi-thread, V3.2.2a)
+chat_history.json
