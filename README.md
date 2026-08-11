@@ -1,5 +1,7 @@
 # 📊 Evidence-Based Financial Research Agent
 
+**[English](README.en.md) | 中文**
+
 **一个基于真实数据的金融研究助手** —— 输入股票代码，获取行情、财务、新闻与 AI 深度研报。
 
 基于 [Streamlit](https://streamlit.io) 构建，全部数据来自**免费数据源**（多源自动降级），内置可对话的 **AI Agent**（支持 DeepSeek / 通义千问 / 智谱 GLM / OpenAI / Ollama），生成带数据来源标注与风险复核的专业研报。
@@ -63,7 +65,7 @@ python scripts/capture_screenshots.py   # 需要先安装 playwright
 ### 2. 安装依赖
 
 ```bash
-git clone https://github.com/<your-username>/evidence-based-financial-research-agent.git
+git clone https://github.com/TianhaoLi1105/evidence-based-financial-research-agent.git
 cd evidence-based-financial-research-agent
 pip install -r requirements.txt
 ```
