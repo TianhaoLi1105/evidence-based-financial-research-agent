@@ -1,0 +1,54 @@
+{"id":"quote_01","lang":"zh","question":"AAPL 现在的股价和今天涨跌幅是多少？","expected_tools":["get_quote"]}
+{"id":"quote_02","lang":"zh","question":"查一下 MSFT 最新成交价、成交量和 52 周高低点。","expected_tools":["get_quote"]}
+{"id":"quote_03","lang":"zh","question":"NVDA 今天收盘价是多少，较上一交易日涨了还是跌了？","expected_tools":["get_quote"]}
+{"id":"quote_04","lang":"en","question":"What is the latest price and daily percentage move for GOOGL?","expected_tools":["get_quote"]}
+{"id":"quote_05","lang":"en","question":"Give me the current quote, volume, and market cap for AMZN.","expected_tools":["get_quote"]}
+{"id":"quote_06","lang":"en","question":"How is TSLA trading today? Include price, change, high, and low.","expected_tools":["get_quote"]}
+{"id":"history_01","lang":"zh","question":"AAPL 过去一年的股价涨跌幅、最高价和最低价是多少？","expected_tools":["get_time_series"]}
+{"id":"history_02","lang":"zh","question":"查看 MSFT 最近 90 天的日线历史表现，不需要画图。","expected_tools":["get_time_series"]}
+{"id":"history_03","lang":"zh","question":"NVDA 过去三年的月线区间表现如何？请给区间起止价格。","expected_tools":["get_time_series"]}
+{"id":"history_04","lang":"en","question":"Summarize GOOGL's historical price performance over the last 180 days without drawing a chart.","expected_tools":["get_time_series"]}
+{"id":"history_05","lang":"en","question":"What were AMZN's period high, low, and return over the past year? Use weekly bars.","expected_tools":["get_time_series"]}
+{"id":"history_06","lang":"en","question":"Show the five most recent daily OHLCV records for META as data, not a visual.","expected_tools":["get_time_series"]}
+{"id":"financials_01","lang":"zh","question":"分析 AAPL 最新营收、净利润、毛利率和自由现金流数据。","expected_tools":["get_financials"]}
+{"id":"financials_02","lang":"zh","question":"MSFT 的资产负债状况如何？给出总资产、总负债、流动比率和负债权益比。","expected_tools":["get_financials"]}
+{"id":"financials_03","lang":"zh","question":"查 NVDA 的 EPS、ROE、PE 和市值。","expected_tools":["get_financials"]}
+{"id":"financials_04","lang":"en","question":"Pull GOOGL's latest revenue, net income, margins, and year-over-year growth.","expected_tools":["get_financials"]}
+{"id":"financials_05","lang":"en","question":"Assess AMZN's financial health using operating cash flow, current ratio, and debt to equity.","expected_tools":["get_financials"]}
+{"id":"financials_06","lang":"en","question":"What are META's latest EPS, ROE, P/E ratio, and market capitalization?","expected_tools":["get_financials"]}
+{"id":"profile_01","lang":"zh","question":"AAPL 是做什么业务的？它属于哪个行业和板块？","expected_tools":["get_profile"]}
+{"id":"profile_02","lang":"zh","question":"介绍一下 MSFT，包括 CEO、员工数和公司官网。","expected_tools":["get_profile"]}
+{"id":"profile_03","lang":"zh","question":"NVDA 的公司简介、交易所和所属行业是什么？","expected_tools":["get_profile"]}
+{"id":"profile_04","lang":"en","question":"What does GOOGL do, and which sector and industry is it in?","expected_tools":["get_profile"]}
+{"id":"profile_05","lang":"en","question":"Give me AMZN's company profile, CEO, employee count, and website.","expected_tools":["get_profile"]}
+{"id":"profile_06","lang":"en","question":"Describe META's business and tell me its exchange and industry.","expected_tools":["get_profile"]}
+{"id":"indicators_01","lang":"zh","question":"AAPL 当前 RSI、MACD 和布林带分别是多少？","expected_tools":["get_indicators"]}
+{"id":"indicators_02","lang":"zh","question":"用 MA20、MA60 和 EMA12/26 看一下 MSFT 的技术面。","expected_tools":["get_indicators"]}
+{"id":"indicators_03","lang":"zh","question":"NVDA 目前是否超买？请查 RSI14 和 MACD，不要画图。","expected_tools":["get_indicators"]}
+{"id":"indicators_04","lang":"en","question":"Get the latest RSI, MACD, and Bollinger Band readings for GOOGL.","expected_tools":["get_indicators"]}
+{"id":"indicators_05","lang":"en","question":"Evaluate AMZN's technical setup using MA20, MA60, EMA12, and EMA26.","expected_tools":["get_indicators"]}
+{"id":"indicators_06","lang":"en","question":"Is META technically overbought or oversold? Check RSI14 and MACD, with no chart.","expected_tools":["get_indicators"]}
+{"id":"compare_01","lang":"zh","question":"对比 AAPL 和 MSFT 的估值、今天涨跌和过去一年表现。","expected_tools":["compare"]}
+{"id":"compare_02","lang":"zh","question":"NVDA、AMD 和 INTC 哪只过去一年表现最好？横向比较一下。","expected_tools":["compare"]}
+{"id":"compare_03","lang":"zh","question":"比较 GOOGL 和 META 的 PE、市值及区间收益率。","expected_tools":["compare"]}
+{"id":"compare_04","lang":"en","question":"Compare AMZN and WMT side by side on price move, P/E, market cap, and one-year return.","expected_tools":["compare"]}
+{"id":"compare_05","lang":"en","question":"Which performed better over the last year: JPM, BAC, or WFC? Compare them once.","expected_tools":["compare"]}
+{"id":"compare_06","lang":"en","question":"Contrast TSLA, F, and GM using valuation and historical performance.","expected_tools":["compare"]}
+{"id":"chart_01","lang":"zh","question":"画一张 AAPL 过去一年的日 K 线图。","expected_tools":["plot_chart"]}
+{"id":"chart_02","lang":"zh","question":"给我画 MSFT 最近 180 天的价格折线图。","expected_tools":["plot_chart"]}
+{"id":"chart_03","lang":"zh","question":"把 NVDA、AMD 和 INTC 的一年走势画在同一张对比图上。","expected_tools":["plot_chart"]}
+{"id":"chart_04","lang":"en","question":"Plot a one-year candlestick chart for GOOGL.","expected_tools":["plot_chart"]}
+{"id":"chart_05","lang":"en","question":"Draw a 90-day price line chart for AMZN.","expected_tools":["plot_chart"]}
+{"id":"chart_06","lang":"en","question":"Chart META and SNAP together for the past year so I can compare their trends.","expected_tools":["plot_chart"]}
+{"id":"news_01","lang":"zh","question":"查一下 AAPL 最近的公司新闻，并概括新闻情绪。","expected_tools":["get_news"]}
+{"id":"news_02","lang":"zh","question":"MSFT 最近有哪些新闻标题？市场情绪偏多还是偏空？","expected_tools":["get_news"]}
+{"id":"news_03","lang":"zh","question":"给我 NVDA 最新 5 条新闻及每条的情绪判断。","expected_tools":["get_news"]}
+{"id":"news_04","lang":"en","question":"Find the latest GOOGL company news and summarize the sentiment.","expected_tools":["get_news"]}
+{"id":"news_05","lang":"en","question":"What are the five most recent AMZN headlines, and is the news tone bullish or bearish?","expected_tools":["get_news"]}
+{"id":"news_06","lang":"en","question":"Check recent META news and label each headline positive, negative, or neutral.","expected_tools":["get_news"]}
+{"id":"valuation_01","lang":"zh","question":"AAPL 现在估值贵不贵？请结合同行 PE 和 52 周价格位置判断。","expected_tools":["get_valuation"]}
+{"id":"valuation_02","lang":"zh","question":"MSFT 当前是高估、低估还是合理？给出同行中位 PE 对比。","expected_tools":["get_valuation"]}
+{"id":"valuation_03","lang":"zh","question":"NVDA 的 PE 相对行业同行有多少溢价，当前价格处于 52 周什么位置？","expected_tools":["get_valuation"]}
+{"id":"valuation_04","lang":"en","question":"Is GOOGL expensive or cheap relative to peers and its 52-week price range?","expected_tools":["get_valuation"]}
+{"id":"valuation_05","lang":"en","question":"Evaluate AMZN's current valuation using peer median P/E and its 52-week position.","expected_tools":["get_valuation"]}
+{"id":"valuation_06","lang":"en","question":"How rich is META's valuation versus industry peers? Include the P/E premium and 52-week position.","expected_tools":["get_valuation"]}
