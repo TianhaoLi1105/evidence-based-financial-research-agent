@@ -1,0 +1,15 @@
+.git
+.github
+.DS_Store
+.agent_config.json
+.cache
+.env
+.venv
+venv
+chat_history.json
+__pycache__
+*.py[cod]
+*.egg-info
+docs
+evals
+tests
