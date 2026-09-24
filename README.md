@@ -1,70 +1,70 @@
 # 📊 Evidence-Based Financial Research Agent
 
-**[English](README.en.md) | 中文**
+**English** | [中文](README.zh-CN.md)
 
 [![Regression Tests](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml/badge.svg)](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml)
 
-这是一个用 Python 和 [Streamlit](https://streamlit.io) 编写的金融研究应用，把行情、财务、新闻数据与 LLM tool calling 结合起来。
+A Python financial research application that combines market-data APIs with an LLM tool-calling agent.
 
-我做这个项目，是想验证 LLM 能否基于检索到的金融数据回答问题，而不是只依赖模型已有知识。数据来自免费接口，并在数据源不可用时自动降级。
+I built it to explore how an LLM can answer financial questions using retrieved data instead of relying only on model knowledge. The application uses free data sources and falls back to alternate providers when one is unavailable.
 
-> ⚠️ 本项目仅供学习与研究，不构成任何投资建议。
+> ⚠️ This project is for learning and research only. Nothing here constitutes investment advice.
 
 ---
 
-## 功能
+## Highlights
 
-### 行情分析
-- 任意美股 K 线图（日 / 周 / 月），支持时间范围切换
-- 技术指标：MA20 / MA60 / EMA12/26 / MACD / BOLL / RSI14
-- 公司概况：简介、行业、板块、CEO、员工数、官网（免费源兜底）
-- 财务数据：营收、净利、毛利率、负债率、现金流、EPS、ROE 等（四源降级）
-- 多股对比：归一化走势图 + 估值/财务指标对比表 + 自选股
-- 市场概览（三大指数）与 K 线 CSV 下载
+### Market Analytics
+- Candlestick charts for any US stock (daily / weekly / monthly) with time-range switching
+- Technical indicators: MA20 / MA60 / EMA12/26 / MACD / BOLL / RSI14
+- Company profiles: description, industry, sector, CEO, employee count, website (free-source fallback)
+- Fundamentals: revenue, net income, gross margin, debt ratio, cash flow, EPS, ROE, etc. (four-source fallback)
+- Multi-stock comparison: normalized trend chart + valuation/fundamental comparison table + watchlist
+- Market overview (three major indices) and K-line CSV export
 
 ### AI Agent
-- 右下角悬浮对话窗，流式输出，支持多话题会话
-- **9 个数据工具**：实时报价、历史 K 线、财务深度、公司概况、技术指标、多股对比、估值判断、新闻情绪、对话内出图
-- **深度分析研报**：自动调用工具链，输出 6 章节报告，可下载 HTML / Markdown
-- **数据来源标注**：关键数字保留来源，缺失字段显示为 N/A
-- **分析师 → 风控二次审阅**（可选开关）：独立风控角色复核数据支撑、指出缺口与遗漏风险
-- **估值贵贱判断**：问「AAPL 现在贵不贵」→ 对比行业同行中位数 + 52 周价格位置
-- **新闻与情绪**：抓取公司新闻并对标题做情绪打分
-- 对话内直接出图（K 线 / 折线 / 多股对比）
-- 个性化记忆：记住常看股票与关注话题，注入对话上下文
+- Floating chat window with streaming output and multi-topic conversations
+- **9 data tools**: real-time quotes, historical K-lines, deep fundamentals, company profile, technical indicators, multi-stock comparison, valuation assessment, news sentiment, in-chat charting
+- **Research report**: runs the relevant tools and outputs a structured report, downloadable as HTML or Markdown
+- **Source attribution**: key numbers carry their data source; missing values are shown as N/A
+- **Analyst → Risk review** (optional): an independent risk-review role re-checks data support and flags gaps or missed risks
+- **Valuation check**: ask "Is AAPL expensive right now?" → compares against industry peers and the 52-week price position
+- **News & sentiment**: fetches company news and scores headline sentiment
+- In-chat chart generation (K-line / line / multi-stock comparison)
+- Personalized memory: remembers frequently viewed tickers and topics, injected into conversation context
 
-### 界面
-- 中英双语一键切换（语言记忆）
-- 深色 UI，无第三方追踪
-- 多模型自由切换：DeepSeek / Qwen / GLM / OpenAI / Ollama / 自定义端点
+### Experience
+- One-click Chinese / English switching (language preference remembered)
+- Dark UI with Chinese and English support
+- Switch between multiple models: DeepSeek / Qwen / GLM / OpenAI / Ollama / custom endpoint
 
 ---
 
-## 功能截图
+## Screenshots
 
-截图位于 `docs/screenshots/`（首次运行可执行下方脚本一键生成）：
+Screenshots live in `docs/screenshots/` (regenerate with the bundled script on first run):
 
 ```bash
-python scripts/capture_screenshots.py   # 需要先安装 playwright
+python scripts/capture_screenshots.py   # requires playwright
 ```
 
-| 单股分析 | AI 对话与深度研报 |
+| Single-stock analysis | AI chat & deep research |
 | --- | --- |
-| ![单股分析](docs/screenshots/single.png) | ![AI 对话](docs/screenshots/chat.png) |
+| ![Single-stock analysis](docs/screenshots/single.png) | ![AI chat](docs/screenshots/chat.png) |
 
-| 多股对比 | 深度研报（下载） |
+| Multi-stock comparison | Deep research report (download) |
 | --- | --- |
-| ![多股对比](docs/screenshots/compare.png) | ![深度研报](docs/screenshots/report.png) |
+| ![Multi-stock comparison](docs/screenshots/compare.png) | ![Deep research report](docs/screenshots/report.png) |
 
 ---
 
-## 快速开始
+## Quick Start
 
-### 1. 环境要求
+### 1. Requirements
 - Python **3.9+**
-- 一个 LLM API Key（可选，不配置也能用行情分析；配置后解锁 AI Agent）
+- An LLM API Key (optional — charting works without it; the AI Agent is unlocked once configured)
 
-### 2. 安装依赖
+### 2. Install dependencies
 
 ```bash
 git clone https://github.com/TianhaoLi1105/evidence-based-financial-research-agent.git
@@ -72,131 +72,132 @@ cd evidence-based-financial-research-agent
 pip install -r requirements.txt
 ```
 
-### 3. 运行
+### 3. Run
 
 ```bash
 streamlit run app.py
 ```
 
-浏览器打开 `http://localhost:8501`。
+Open `http://localhost:8501` in your browser.
 
-默认情况下，API Key、模型配置和聊天记录仅保存在当前浏览器会话对应的服务器内存中；刷新页面或重启应用后需重新配置。这使不同访问者不会共用密钥和聊天记录。仅在可信的单人本机环境中，如需恢复原有磁盘持久化，可运行 `AGENT_LOCAL_PERSISTENCE=1 streamlit run app.py`。该模式不适合多人访问。
+By default, API keys, model profiles, and chat history are kept only in server memory for the current browser session. Refreshing or restarting requires setup again. This prevents visitors from sharing credentials and conversations. For trusted single-user local use, restore disk persistence with `AGENT_LOCAL_PERSISTENCE=1 streamlit run app.py`. Do not use that mode for multi-user access.
 
-### 4. 配置
-- **数据 API（可选）**：点击右上角 `KEY` → 填写 [Twelve Data](https://twelvedata.com) 免费 Key。不填时自动使用免费备用源（腾讯财经 / stockanalysis.com / 东财），数据略少但功能可用。
-- **AI 模型（可选）**：点击右上角 `KEY` → `AI 模型` 标签页 → 选择服务商并填入 API Key。支持：
+### 4. Configuration
+- **Data API (optional)**: click `KEY` in the top-right corner → enter a free [Twelve Data](https://twelvedata.com) key. Without one, the app automatically falls back to free sources (Tencent Finance / stockanalysis.com / East Money) — slightly fewer fields, but everything still works.
+- **AI model (optional)**: click `KEY` → the `AI Model` tab → pick a provider and enter your API key. Supported:
 
-| 服务商 | Base URL | 默认模型 |
+| Provider | Base URL | Default model |
 | --- | --- | --- |
 | DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` |
-| 通义千问 (Qwen) | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |
-| 智谱 GLM | `https://open.bigmodel.cn/api/paas/v4` | `glm-4-flash` |
+| Qwen | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |
+| Zhipu GLM | `https://open.bigmodel.cn/api/paas/v4` | `glm-4-flash` |
 | OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` |
-| Ollama（本地） | `http://localhost:11434/v1` | `qwen2.5` |
-| 自定义 | 任意 OpenAI 兼容端点 | — |
+| Ollama (local) | `http://localhost:11434/v1` | `qwen2.5` |
+| Custom | any OpenAI-compatible endpoint | — |
 
 ### 5. Docker
 
-已安装 Docker Desktop 的情况下，一条命令完成构建并启动：
+With Docker Desktop installed, build and start the application with one command:
 
 ```bash
 docker compose up --build
 ```
 
-浏览器打开 `http://localhost:8501`；停止服务使用 `docker compose down`。
+Open `http://localhost:8501`; stop it with `docker compose down`.
 
 ---
 
-## 架构
+## Architecture
 
 ```
-app.py                    # Streamlit 入口：单股分析 / 多股对比 / 市场概览
-├── agent/                # AI Agent 层
-│   ├── tools.py          #   9 个数据工具（Function Calling）
-│   ├── executor.py       #   工具调用循环 + 风控复核
-│   ├── prompts.py        #   系统提示词（13 条规则 + 风控角色）
-│   └── llm_client.py     #   多提供商 OpenAI 兼容客户端
-├── data/                 # 数据层（全部免费源 + 24h 缓存）
-│   ├── fundamentals.py   #   四源降级财务深度
-│   ├── news.py           #   东财 → Google News
-│   ├── valuation.py      #   估值相对位置（同行对比）
-│   ├── chat_store.py     #   多话题会话持久化
-│   └── preferences.py    #   个性化记忆
-├── services/             # 行情/报价降级链路
-├── components/           # 页面组件（K线/对比/卡片/AI 聊天窗）
-└── i18n.py               # 中英双语（215 键）
+app.py                    # Streamlit entry: single-stock / compare / market overview
+├── agent/                # AI Agent layer
+│   ├── tools.py          #   9 data tools (function calling)
+│   ├── executor.py       #   tool-call loop + risk review
+│   ├── prompts.py        #   system prompts (13 rules + risk-review role)
+│   └── llm_client.py     #   multi-provider OpenAI-compatible client
+├── data/                 # data layer (free sources + 24h cache)
+│   ├── fundamentals.py   #   four-source deep fundamentals
+│   ├── news.py           #   East Money → Google News
+│   ├── valuation.py      #   relative valuation (peer comparison)
+│   ├── chat_store.py     #   multi-topic session persistence
+│   └── preferences.py    #   personalized memory
+├── services/             # quote/fallback chains
+├── components/           # UI components (K-line, compare, cards, AI chat)
+└── i18n.py               # Chinese/English UI strings (215 keys)
 ```
 
-**数据源降级链（免费优先）**
+**Source fallback chains (free-first)**
 
-| 能力 | 降级链 |
+| Capability | Fallback chain |
 | --- | --- |
-| 实时报价 | Twelve Data → 腾讯财经 |
-| 财务深度 | Twelve Data → stockanalysis.com → yfinance → 新浪 |
-| 公司概况 | Twelve Data → stockanalysis.com |
-| 新闻 | 东方财富 → Google News |
-| 估值对比 | 腾讯/stockanalysis + 本地计算（同行映射 + 52 周分位） |
+| Real-time quotes | Twelve Data → Tencent Finance |
+| Fundamentals | Twelve Data → stockanalysis.com → yfinance → Sina |
+| Company profile | Twelve Data → stockanalysis.com |
+| News | East Money → Google News |
+| Valuation | Tencent/stockanalysis + local computation (peer mapping + 52-week percentile) |
 
-结果包含 `source` 字段；数据源失败时自动降级，缺失字段保留为 N/A。
+Results carry a `source` field where available, and missing fields are shown as N/A.
 
 ---
 
-## 测试
+## Testing
 
-项目维护 18 组回归测试（覆盖工具层、降级链路、AI 事件流、渲染、记忆和 Evaluation，全部 **mock 数据源、无需网络**）：
+The project maintains 18 regression test groups (tool layer, fallback chains, AI event stream, rendering, memory, and evaluation — all with **mocked data sources, no network needed**):
 
 ```bash
-bash tests/run_all.sh        # 一键运行全部 18 组
-python tests/test_valuation.py  # 运行单组（如估值）
+bash tests/run_all.sh        # run all 18 groups at once
+python tests/test_valuation.py  # run one group
 ```
 
-| 测试文件 | 覆盖范围 |
+| Test files | Coverage |
 | --- | --- |
-| `test_agent_*` / `test_deep_analysis.py` / `test_risk_review.py` | Agent、工具路由、报告与风控复核 |
-| `test_app_integration.py` / `test_*chart*` / `test_financial_rendering.py` | 应用流程、图表和财务渲染 |
-| `test_fundamentals.py` / `test_news.py` / `test_valuation.py` | 数据解析、降级链和估值 |
-| `test_preferences.py` / `test_lang_mem.py` / `test_chat_store.py` | 偏好、语言和会话状态 |
-| `tests/test_security_provenance.py` / `test_evaluation.py` | 会话隔离、来源追踪、评测数据与指标 |
+| `tests/test_agent_*.py` / `test_app_integration.py` | LLM client, message assembly, tools, i18n, app flow |
+| `tests/test_chart_*.py` / `test_chat_charts.py` | chart generation, rendering, persistence, and fallback |
+| `tests/test_fundamentals.py` / `test_news.py` / `test_valuation.py` | data parsing, provider fallback, sentiment, and valuation |
+| `tests/test_deep_analysis.py` / `test_risk_review.py` | research flow, report export, and risk review |
+| `tests/test_comparison_context.py` / `test_preferences.py` | comparison context and personalized memory |
+| `tests/test_lang_mem.py` / `test_chat_store.py` | language memory, multi-topic storage |
+| `tests/test_security_provenance.py` / `test_evaluation.py` | session isolation, provenance, evaluation data and metrics |
 
-### 真实 Agent Evaluation
+### Real agent evaluation
 
-`evals/tool_routing_cases.jsonl` 包含 54 条中英文问题，9 个工具各 6 条，每条均标注 `expected_tools`。使用本地已配置的模型和真实数据工具运行：
+`evals/tool_routing_cases.jsonl` contains 54 Chinese and English questions: six for each of nine tools, with `expected_tools` annotated on every case. Run it against the locally configured model and real data tools:
 
-**评测规则：** DeepSeek Chat 回答 54 条双语问题，覆盖 9 个工具；Tool routing accuracy 使用严格 exact-match，实际工具集合必须与 `expected_tools` 完全相同，任何额外工具调用也计为 routing failure。
+**Evaluation protocol:** DeepSeek Chat answers 54 bilingual queries covering nine tools. Tool routing accuracy uses strict exact match: the actual tool set must equal `expected_tools`, and every additional tool call counts as a routing failure.
 
 ```bash
 AGENT_LOCAL_PERSISTENCE=1 python3 scripts/evaluate_agent.py
 ```
 
-最新真实运行结果见 [`docs/EVALUATION.md`](docs/EVALUATION.md)，完整逐题结果保存在 `evals/results/latest.json`。
+See [`docs/EVALUATION.md`](docs/EVALUATION.md) for the latest real run. Full per-case results are stored in `evals/results/latest.json`.
 
-GitHub Actions 每次 push 和 pull request 自动运行 18 组离线回归测试并构建 Docker 镜像。真实 Evaluation 不在 CI 中运行，因为它会调用真实 LLM/API、产生费用，结果也可能存在随机性。
-
-
----
-
-## 隐私与安全
-
-- **默认会话隔离**：API Key、模型配置和聊天历史只保存在当前 Streamlit 会话的服务器内存中，不同访问者互不可见
-- **单人本机持久化可选**：设置 `AGENT_LOCAL_PERSISTENCE=1` 后使用 `.agent_config.json` 和 `chat_history.json`（均已被 `.gitignore` 排除）
-- **无第三方追踪**：应用不收集、不上传任何用户数据
-- **数据源均为公开免费接口**：不涉及用户隐私信息
-- **密钥永不出现在日志或代码中**
+GitHub Actions runs all 18 offline regression groups and builds the Docker image on every push and pull request. The real evaluation is excluded from CI because it calls live LLM/API services, costs money, and may have stochastic results.
 
 ---
 
-## 免责声明
+## Privacy & Security
 
-本项目仅供**学习与研究**目的。所有数据来自公开免费接口，可能延迟或不完整；AI 生成内容仅供参考，**不构成任何投资建议**。股市有风险，投资需谨慎。
+- **Session isolation by default**: API keys, model profiles, and chat history live only in the current Streamlit session's server memory, isolated from other visitors
+- **Optional single-user persistence**: `AGENT_LOCAL_PERSISTENCE=1` uses `.agent_config.json` and `chat_history.json` (both gitignored)
+- **No third-party tracking**: the app collects and uploads nothing
+- **Public free endpoints only**: no user privacy data involved
+- **Keys never appear in logs or code**
+
+---
+
+## Disclaimer
+
+For **learning and research** purposes only. All data comes from public free endpoints and may be delayed or incomplete; AI-generated content is for reference only and **does not constitute investment advice**. Markets involve risk — invest carefully.
 
 ---
 
 ## Roadmap
 
-- [x] 基础行情、公司概况和 CSV 导出
-- [x] 多股对比
-- [x] Tool-calling Agent、财务分析、新闻、估值和风险复核
-- [ ] 更多备用数据源和 PDF 研报导出
+- [x] Basic market analytics
+- [x] Multi-stock comparison, company profiles, and CSV export
+- [x] Tool-calling agent, multi-topic chat, charting, fundamentals, news, valuation, and risk review
+- [ ] More backup data sources, multi-stock comparison Q&A, and PDF report export
 
 ---
 
