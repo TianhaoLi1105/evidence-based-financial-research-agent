@@ -72,7 +72,7 @@ def _fmt_usd(val) -> str:
 
 
 def _deep_financial_rows(stats: dict, lang: str) -> list:
-    """V3.4.5：四源深度财务行（免费 Key 主路径；字段缺失自动跳过）"""
+    """四源深度财务行（免费 Key 主路径；字段缺失自动跳过）"""
     f = stats.get("deep_fundamentals") or {}
     if not isinstance(f, dict) or f.get("source") in (None, "none"):
         return []
@@ -158,7 +158,7 @@ def render_financials(stats: dict):
             use_container_width=True, hide_index=True,
         )
     elif stats and _deep_financial_rows(stats, st.session_state.lang):
-        # V3.4.5：无 Pro 财报时展示四源深度财务（营收/净利/负债率等）
+        # 无 Pro 财报时展示四源深度财务（营收/净利/负债率等）
         st.dataframe(
             pd.DataFrame(
                 _deep_financial_rows(stats, st.session_state.lang),

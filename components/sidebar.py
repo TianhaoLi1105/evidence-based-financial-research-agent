@@ -98,7 +98,7 @@ def render_sidebar() -> dict:
             unsafe_allow_html=True,
         )
 
-        # ── 股票输入（支持名称或代码，带实时建议）──
+        # 股票输入（支持名称或代码，带实时建议）
         ticker_input = st.text_input(
             t("ticker_label", st.session_state.lang),
             value=st.session_state.ticker_input,
@@ -128,7 +128,7 @@ def render_sidebar() -> dict:
         elif not ticker_input:
             ticker = ""
 
-        # ── 时间范围 ──
+        # 时间范围
         popts = get_period_options(st.session_state.lang)
         plabels = list(popts.keys())
         p1y = t("period_1y", st.session_state.lang)
@@ -138,7 +138,7 @@ def render_sidebar() -> dict:
         )
         period_days = popts[sel_period]
 
-        # ── K 线周期 ──
+        # K 线周期
         interval_opts = {
             t("interval_day", st.session_state.lang): "1day",
             t("interval_week", st.session_state.lang): "1week",
@@ -150,7 +150,7 @@ def render_sidebar() -> dict:
         )
         interval = interval_opts[interval_label]
 
-        # ── 技术指标开关 ──
+        # 技术指标开关
         st.markdown(
             f'<p style="font-size:.6875rem;font-weight:600;'
             f'text-transform:uppercase;letter-spacing:.06em;'
@@ -168,7 +168,7 @@ def render_sidebar() -> dict:
             show_boll = st.checkbox("BOLL", value=True)
             show_rsi = st.checkbox("RSI14", value=True)
 
-        # ── 加入自选股 ──
+        # 加入自选股
         if ticker and ticker not in _watchlist():
             if st.button(t("add_watch", st.session_state.lang),
                          use_container_width=True):
@@ -208,7 +208,7 @@ def render_compare_sidebar():
             unsafe_allow_html=True,
         )
 
-        # ── 添加股票 ──
+        # 添加股票
         new_ticker = st.text_input(
             t("compare_add_label", st.session_state.lang),
             placeholder=t("compare_add_placeholder", st.session_state.lang),
@@ -218,7 +218,7 @@ def render_compare_sidebar():
             if new_ticker not in st.session_state.compare_tickers:
                 st.session_state.compare_tickers.append(new_ticker)
 
-        # ── 已选股票列表（带删除）──
+        # 已选股票列表（带删除）
         if st.session_state.compare_tickers:
             st.markdown(
                 f'<p style="font-size:.6875rem;font-weight:600;'
@@ -240,7 +240,7 @@ def render_compare_sidebar():
                         unsafe_allow_html=True,
                     )
 
-        # ── K 线周期 ──
+        # K 线周期
         interval_opts = {
             t("interval_day", st.session_state.lang): "1day",
             t("interval_week", st.session_state.lang): "1week",
@@ -252,7 +252,7 @@ def render_compare_sidebar():
         )
         interval = interval_opts[interval_label]
 
-        # ── 时间范围 ──
+        # 时间范围
         popts = get_period_options(st.session_state.lang)
         plabels = list(popts.keys())
         p1y = t("period_1y", st.session_state.lang)

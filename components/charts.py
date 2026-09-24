@@ -64,7 +64,7 @@ def render_price_chart(hist: list, indicators: dict, ticker: str,
         row_heights=row_heights, vertical_spacing=0.04,
     )
 
-    # ── 主图：蜡烛图 ──
+    # 主图：蜡烛图
     fig.add_trace(go.Candlestick(
         x=df["datetime"], open=df["open"], high=df["high"],
         low=df["low"], close=df["close"], name="OHLC",
@@ -72,7 +72,7 @@ def render_price_chart(hist: list, indicators: dict, ticker: str,
         decreasing_line_color=C["red"], decreasing_fillcolor=C["red"],
     ), row=1, col=1)
 
-    # ── 均线叠加（MA20 / MA60 / EMA12 / EMA26）──
+    # 均线叠加（MA20 / MA60 / EMA12 / EMA26）
     line_specs = {
         "ma20": ("#ff9f0a", show_ma20, 1.8),
         "ma60": ("#bf5af2", show_ma60, 1.8),
@@ -89,7 +89,7 @@ def render_price_chart(hist: list, indicators: dict, ticker: str,
                 line=dict(color=color, width=width),
             ), row=1, col=1)
 
-    # ── 布林带（BOLL 上/中/下轨）──
+    # 布林带（BOLL 上/中/下轨）
     if show_boll and indicators.get("boll", {}).get("middle"):
         boll = indicators["boll"]
         boll_specs = {
@@ -107,7 +107,7 @@ def render_price_chart(hist: list, indicators: dict, ticker: str,
                     line=dict(color="#8e8e93", width=1.1, dash=dash),
                 ), row=1, col=1)
 
-    # ── 成交量（副图，固定 row2）──
+    # 成交量（副图，固定 row2）
     vol_colors = [C["green"] if c >= o else C["red"]
                   for o, c in zip(df["open"], df["close"])]
     fig.add_trace(go.Bar(
@@ -117,7 +117,7 @@ def render_price_chart(hist: list, indicators: dict, ticker: str,
 
     next_row = 3
 
-    # ── MACD 副图 ──
+    # MACD 副图
     if show_macd:
         macd = indicators["macd"]
         dif = _merge_trace(df, macd["dif"], "dif")
@@ -139,7 +139,7 @@ def render_price_chart(hist: list, indicators: dict, ticker: str,
         ), row=next_row, col=1)
         next_row += 1
 
-    # ── RSI 副图 ──
+    # RSI 副图
     if show_rsi:
         rdf = _to_df(indicators["rsi14"])
         rdf["rsi14"] = rdf["rsi14"].astype(float)
@@ -155,7 +155,7 @@ def render_price_chart(hist: list, indicators: dict, ticker: str,
         fig.add_hline(y=30, line_dash="dot", line_color=C["border"],
                       row=next_row, col=1)
 
-    # ── 布局 ──
+    # 布局
     title_text = t("price_chart_title", st.session_state.lang,
                    ticker=ticker, period=period_label)
     if interval_label:

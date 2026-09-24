@@ -1,4 +1,4 @@
-"""V3.1.2 AppTest 集成测试：AI 组件抽屉 + 设置弹窗 + V2 回归（全部 mock，无网络）"""
+"""AI 抽屉与设置弹窗的 AppTest 集成测试。"""
 import os, sys, tempfile
 from unittest import mock
 
@@ -78,7 +78,6 @@ try:
 
         at = AppTest.from_file("app.py", default_timeout=60)
 
-        # ── 1. 初始加载（英文）：两模式 + 组件 iframe + fab 尺寸 ──
         at.run()
         check("no exception on boot", not at.exception, str(at.exception))
         check("two mode buttons", bool(at.button(key="mode_single_btn"))
@@ -90,7 +89,6 @@ try:
         check("drawer css hidden", "width:460px" not in boot_css)
         check("single sidebar ticker input", bool(at.text_input(key="ticker_input_widget")))
 
-        # ── 2. 单股分析回归 ──
         at.text_input(key="ticker_input_widget").set_value("AAPL"); at.run()
         analyze_btn = [b for b in at.button if b.label == "Analyze"]
         check("analyze button found", len(analyze_btn) == 1)
@@ -99,12 +97,10 @@ try:
         check("metric cards rendered", len(at.metric) >= 4)
         check("price chart rendered", len(at.get("plotly_chart")) >= 1)
 
-        # ── 3. 语言切换 ──
         at.button(key="lang_btn").click(); at.run()
         check("zh title shown", any("金融研究助手" in str(m.value) for m in at.markdown))
         check("ticker preserved", at.text_input(key="ticker_input_widget").value == "AAPL")
 
-        # ── 4. 多股对比回归 ──
         at.button(key="mode_compare_btn").click(); at.run()
         tinputs = at.text_input
         tinputs[0].set_value("GOOGL"); at.run()
@@ -116,16 +112,14 @@ try:
         check("no exception after compare", not at.exception, str(at.exception))
         check("compare chart rendered", len(at.get("plotly_chart")) >= 1)
 
-        # ── 5. 打开 AI 抽屉（会话状态注入，等价于点击悬浮按钮）──
         at.session_state["show_chat"] = True
         at.run()
         check("no exception opening drawer", not at.exception, str(at.exception))
         open_css = " ".join(str(m.value) for m in at.markdown)
         check("drawer css applied", "width:460px" in open_css)
-        check("no overlay (V3.2.2d)", "#ai-overlay" not in open_css)
+        check("no overlay ()", "#ai-overlay" not in open_css)
         check("welcome shown", any("AI 金融助手" in str(m.value) for m in at.markdown))
 
-        # ── 5b. 最小化：消息区隐藏、iframe 高度切换为迷你条 ──
         at.session_state["show_mini"] = True
         at.run()
         check("no exception mini mode", not at.exception, str(at.exception))
@@ -135,7 +129,6 @@ try:
         at.session_state["show_mini"] = False
         at.run()
 
-        # ── 6. 发消息 → 流式回复（长文本 + markdown 渲染）──
         at.session_state["chat_messages"] = [{"role": "user", "content": "什么是 RSI？"}]
         at.run()
         check("no exception after send", not at.exception, str(at.exception))
@@ -146,13 +139,11 @@ try:
         check("message area rendered", any(
             'id="chat-msgs"' in str(m.value) for m in at.markdown))
 
-        # ── 7. 关闭抽屉（等价于点击 ✕）──
         at.session_state["show_chat"] = False
         at.run()
         closed_css = " ".join(str(m.value) for m in at.markdown)
         check("drawer css hidden after close", "width:460px" not in closed_css)
 
-        # ── 8. KEY 弹窗：新增第二个模型配置 ──
         at.button(key="api_btn").click(); at.run()
         check("three tabs in modal (data/llm/prefs)", len(at.tabs) == 3)
         llm_tab = at.tabs[1]
@@ -168,14 +159,12 @@ try:
               and any(p["name"] == "OpenAI" for p in profiles), str(profiles))
         at.button(key="modal_close").click(); at.run()
 
-        # ── 9. 删除新增配置 ──
         at.button(key="api_btn").click(); at.run()
         llm_tab = at.tabs[1]
         openai_pid = next(p["id"] for p in storage.get_llm_profiles() if p["name"] == "OpenAI")
         llm_tab.button(key=f"llm_del_{openai_pid}").click(); at.run()
         check("second llm profile deleted", len(storage.get_llm_profiles()) == 1)
 
-        # ── 10. 配置文件未污染 ──
         cfg = storage.load_config()
         check("config api_key intact", cfg.get("api_key") == "test-demo-key")
         check("config watchlist intact", cfg.get("watchlist") == ["AAPL"])

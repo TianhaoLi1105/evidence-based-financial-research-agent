@@ -1,10 +1,9 @@
-"""V3.1.2 单元测试：LLM 客户端 / 消息组装 / 存储 / i18n / markdown 转换 / 抽屉动作"""
+"""单元测试：LLM 客户端 / 消息组装 / 存储 / i18n / markdown 转换 / 抽屉动作"""
 import json, os, sys, tempfile, types
 from unittest import mock
 
 sys.path.insert(0, os.getcwd())
 
-# ── 1. build_messages ──
 from agent.prompts import build_messages, build_system_prompt
 msgs = build_messages("zh", [
     {"role": "user", "content": "你好"},
@@ -17,7 +16,6 @@ assert msgs[3] == {"role": "user", "content": "drop?"}
 assert build_system_prompt("fr") == build_system_prompt("en")
 print("PASS build_messages / system prompt")
 
-# ── 2. stream_chat 无 Key / mock 流 ──
 from agent import llm_client
 out = list(llm_client.stream_chat({}, msgs, lang="zh"))
 assert out and "未配置" in "".join(out)
@@ -53,7 +51,6 @@ finally:
 assert "".join(out) == "你好，世界"
 print("PASS stream_chat no-key / streamed chunks")
 
-# ── 3. storage upsert/delete/active ──
 import data.storage as storage
 tmp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
 tmp.write('{"api_key": "k", "watchlist": ["AAPL"]}')
@@ -82,7 +79,6 @@ finally:
     if os.path.exists(tmp.name):
         os.remove(tmp.name)
 
-# ── 4. markdown → HTML 转换器 ──
 from components.chat import _md_to_html
 md = "**加粗** 和 `code`\n\n- 项目一\n- 项目二\n\n1. 第一\n2. 第二\n\n### 小标题\n\n```python\nprint('x')\n```\n\n> 引用\n\n[链接](https://a.b)"
 h = _md_to_html(md)
@@ -95,7 +91,6 @@ assert "<script>" not in h2 and "&lt;script&gt;" in h2
 assert _md_to_html("") == "" and _md_to_html(None) == ""
 print("PASS md_to_html")
 
-# ── 5. 抽屉动作处理（mock session_state）──
 import components.chat as chat
 class FakeSS(dict):
     def __getattr__(self, k):
@@ -138,7 +133,6 @@ with mock.patch.object(chat.st, "session_state", ss):
     assert len(ss["chat_messages"]) == 30
     print("PASS handle_ai_action")
 
-# ── 6. i18n 完整性 ──
 import re
 calls = set()
 for root, _, files in os.walk("."):

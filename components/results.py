@@ -75,13 +75,13 @@ def render_results(data: dict):
         unsafe_allow_html=True,
     )
 
-    # ── 公司概况 ──
+    # 公司概况
     render_company_profile(profile)
 
-    # ── 关键指标卡片 ──
+    # 关键指标卡片
     render_metric_cards(quote, stats)
 
-    # ── K 线图（蜡烛图 + 均线 + RSI）──
+    # K 线图（蜡烛图 + 均线 + RSI）
     cc1, cc2 = st.columns([6, 1])
     with cc1:
         st.markdown(f'<h2>{t("price_chart", st.session_state.lang)}</h2>',
@@ -104,11 +104,11 @@ def render_results(data: dict):
         show_rsi=data.get("show_rsi", True),
     )
 
-    # ── 财务数据 ──
+    # 财务数据
     st.markdown(f'<h2>{t("financial_data", st.session_state.lang)}</h2>', unsafe_allow_html=True)
     render_financials(stats)
 
-    # ── 数据来源 ──
+    # 数据来源
     st.markdown(
         f'<h2 style="margin-top:2.5rem;">{t("data_sources", st.session_state.lang)}</h2>',
         unsafe_allow_html=True,

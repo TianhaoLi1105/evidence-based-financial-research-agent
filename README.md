@@ -4,17 +4,17 @@
 
 [![Regression Tests](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml/badge.svg)](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml)
 
-**一个基于真实数据的金融研究助手** —— 输入股票代码，获取行情、财务、新闻与 AI 深度研报。
+这是一个用 Python 和 [Streamlit](https://streamlit.io) 编写的金融研究应用，把行情、财务、新闻数据与 LLM tool calling 结合起来。
 
-基于 [Streamlit](https://streamlit.io) 构建，全部数据来自**免费数据源**（多源自动降级），内置可对话的 **AI Agent**（支持 DeepSeek / 通义千问 / 智谱 GLM / OpenAI / Ollama），生成带数据来源标注与风险复核的专业研报。
+我做这个项目，是想验证 LLM 能否基于检索到的金融数据回答问题，而不是只依赖模型已有知识。数据来自免费接口，并在数据源不可用时自动降级。
 
 > ⚠️ 本项目仅供学习与研究，不构成任何投资建议。
 
 ---
 
-## ✨ 功能亮点
+## 功能
 
-### 📈 行情分析（V1–V2）
+### 行情分析
 - 任意美股 K 线图（日 / 周 / 月），支持时间范围切换
 - 技术指标：MA20 / MA60 / EMA12/26 / MACD / BOLL / RSI14
 - 公司概况：简介、行业、板块、CEO、员工数、官网（免费源兜底）
@@ -22,25 +22,25 @@
 - 多股对比：归一化走势图 + 估值/财务指标对比表 + 自选股
 - 市场概览（三大指数）与 K 线 CSV 下载
 
-### 🤖 AI 智能 Agent（V3）
-- 右下角悬浮对话窗，流式输出，支持多话题会话（本地持久化）
+### AI Agent
+- 右下角悬浮对话窗，流式输出，支持多话题会话
 - **9 个数据工具**：实时报价、历史 K 线、财务深度、公司概况、技术指标、多股对比、估值判断、新闻情绪、对话内出图
-- **深度分析研报**：自动调用完整工具链，输出 6 章节结构化报告（公司概况 / 财务与估值 / 技术面 / 主要风险 / **数据自检** / 结论），可下载 HTML / Markdown
-- **数据来源逐条标注**：每个关键数字标注来源，拒绝编造
+- **深度分析研报**：自动调用工具链，输出 6 章节报告，可下载 HTML / Markdown
+- **数据来源标注**：关键数字保留来源，缺失字段显示为 N/A
 - **分析师 → 风控二次审阅**（可选开关）：独立风控角色复核数据支撑、指出缺口与遗漏风险
 - **估值贵贱判断**：问「AAPL 现在贵不贵」→ 对比行业同行中位数 + 52 周价格位置
 - **新闻与情绪**：抓取公司新闻并对标题做情绪打分
 - 对话内直接出图（K 线 / 折线 / 多股对比）
 - 个性化记忆：记住常看股票与关注话题，注入对话上下文
 
-### 🌍 体验
+### 界面
 - 中英双语一键切换（语言记忆）
-- Apple 风格深色 UI，无第三方追踪
+- 深色 UI，无第三方追踪
 - 多模型自由切换：DeepSeek / Qwen / GLM / OpenAI / Ollama / 自定义端点
 
 ---
 
-## 📸 功能截图
+## 功能截图
 
 截图位于 `docs/screenshots/`（首次运行可执行下方脚本一键生成）：
 
@@ -58,7 +58,7 @@ python scripts/capture_screenshots.py   # 需要先安装 playwright
 
 ---
 
-## 🚀 快速开始
+## 快速开始
 
 ### 1. 环境要求
 - Python **3.9+**
@@ -107,7 +107,7 @@ docker compose up --build
 
 ---
 
-## 🏗 架构
+## 架构
 
 ```
 app.py                    # Streamlit 入口：单股分析 / 多股对比 / 市场概览
@@ -137,26 +137,25 @@ app.py                    # Streamlit 入口：单股分析 / 多股对比 / 市
 | 新闻 | 东方财富 → Google News |
 | 估值对比 | 腾讯/stockanalysis + 本地计算（同行映射 + 52 周分位） |
 
-所有结果带 `source` 字段标注来源；失败静默降级，字段缺失显示 N/A，**绝不编造**。
+结果包含 `source` 字段；数据源失败时自动降级，缺失字段保留为 N/A。
 
 ---
 
-## ✅ 测试
+## 测试
 
 项目维护 18 组回归测试（覆盖工具层、降级链路、AI 事件流、渲染、记忆和 Evaluation，全部 **mock 数据源、无需网络**）：
 
 ```bash
 bash tests/run_all.sh        # 一键运行全部 18 组
-python tests/test_v343.py    # 运行单组（如估值）
+python tests/test_valuation.py  # 运行单组（如估值）
 ```
 
 | 测试文件 | 覆盖范围 |
 | --- | --- |
-| `tests/test_v31_*.py` | LLM 客户端、消息组装、i18n、应用流程 |
-| `tests/test_v32_*.py` | 工具层、深度分析、图表、出图兜底 |
-| `tests/test_v33_*.py` | 上下文增强、出图持久化、个性化记忆 |
-| `tests/test_v341.py` ~ `test_v345.py` | 财务深度、新闻情绪、估值、报告/风控、收尾增强 |
-| `tests/test_lang_mem.py` / `test_chat_store.py` | 语言记忆、多话题存储 |
+| `test_agent_*` / `test_deep_analysis.py` / `test_risk_review.py` | Agent、工具路由、报告与风控复核 |
+| `test_app_integration.py` / `test_*chart*` / `test_financial_rendering.py` | 应用流程、图表和财务渲染 |
+| `test_fundamentals.py` / `test_news.py` / `test_valuation.py` | 数据解析、降级链和估值 |
+| `test_preferences.py` / `test_lang_mem.py` / `test_chat_store.py` | 偏好、语言和会话状态 |
 | `tests/test_security_provenance.py` / `test_evaluation.py` | 会话隔离、来源追踪、评测数据与指标 |
 
 ### 真实 Agent Evaluation
@@ -176,7 +175,7 @@ GitHub Actions 每次 push 和 pull request 自动运行 18 组离线回归测�
 
 ---
 
-## 🔒 隐私与安全
+## 隐私与安全
 
 - **默认会话隔离**：API Key、模型配置和聊天历史只保存在当前 Streamlit 会话的服务器内存中，不同访问者互不可见
 - **单人本机持久化可选**：设置 `AGENT_LOCAL_PERSISTENCE=1` 后使用 `.agent_config.json` 和 `chat_history.json`（均已被 `.gitignore` 排除）
@@ -186,21 +185,21 @@ GitHub Actions 每次 push 和 pull request 自动运行 18 组离线回归测�
 
 ---
 
-## 📄 免责声明
+## 免责声明
 
 本项目仅供**学习与研究**目的。所有数据来自公开免费接口，可能延迟或不完整；AI 生成内容仅供参考，**不构成任何投资建议**。股市有风险，投资需谨慎。
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 
-- [x] V1 基础行情网站
-- [x] V2 多股对比 + 公司概况 + CSV 导出
-- [x] V3 AI Agent（工具层 / 多话题 / 出图 / 财务深度 / 新闻情绪 / 估值 / 风险复核）
-- [ ] V4：更多数据源（备用 API）、多股票对比问答、PDF 研报导出
+- [x] 基础行情、公司概况和 CSV 导出
+- [x] 多股对比
+- [x] Tool-calling Agent、财务分析、新闻、估值和风险复核
+- [ ] 更多备用数据源和 PDF 研报导出
 
 ---
 
-## 📄 License
+## License
 
 [MIT](LICENSE) © 2026 Evidence-Based Financial Research Agent contributors

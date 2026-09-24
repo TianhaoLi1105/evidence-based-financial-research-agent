@@ -1,21 +1,4 @@
-"""
-Fundamentals Module (V3.4.1)
-============================
-财务深度数据：三大报表关键项（利润表 / 资产负债表 / 现金流量表）+ 营收净利趋势。
-
-数据源四降级：
-1. Twelve Data /income_statement|balance_sheet|cash_flow（period=quarterly）——
-   免费套餐对美股仅开放 AAPL 一只演示股，其余 403；限速 429 时自动等待重试。
-2. stockanalysis.com（免 Key，覆盖全部美股）—— 季度三大报表 + 同比 + 趋势。
-3. yfinance（免 Key，本机已装）—— 三大报表全量 + 季度趋势；国内访问 Yahoo
-   慢/失败时加 20 秒硬超时自动降级。
-4. 新浪财经财务摘要（免 Key）—— 仅支持 A/港股票；美股返回空时自动识别并降级。
-
-设计原则（沿用项目哲学）：
-- 所有字段允许 None：数据缺失时不编造，由 AI 如实说明
-- 比率只从已取到的真实字段计算（毛利率/净利率/负债率/流动比率/ROE）
-- 接口失败静默降级，不抛异常（返回 source="none" 的空模型）
-"""
+"""Fetch and normalize company fundamentals from fallback providers."""
 
 import concurrent.futures
 import io
@@ -59,7 +42,7 @@ CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file_
 CACHE_TTL = 86400   # 财务数据 24 小时缓存（非关键实时数据，够用）
 
 
-# ─── 通用工具 ───────────────────────────────────────────
+# 通用工具
 
 def _td_request(symbol: str, api_key: str) -> dict:
     """请求 Twelve Data 三大报表（季度）；任一失败抛异常，由外层降级"""
@@ -148,7 +131,7 @@ def _pct_change(latest, older) -> float:
     return (latest / older - 1) * 100
 
 
-# ─── Twelve Data 全量解析 ───────────────────────────────
+# Twelve Data 全量解析
 
 def _from_twelvedata(ticker: str, api_key: str) -> dict:
     """解析 Twelve Data 三大报表（period=quarterly）：TTM 营收/净利/毛利 + 资产负债 + 现金流 + 趋势"""
@@ -235,7 +218,7 @@ def _from_twelvedata(ticker: str, api_key: str) -> dict:
     }
 
 
-# ─── yfinance 全量解析（免费，三大报表 + 季度趋势）────────
+# yfinance 全量解析（免费，三大报表 + 季度趋势）
 
 def _yf_row(df, *keywords):
     """按关键词在 DataFrame index 找行，返回 Series（最新一列在前）"""
@@ -355,7 +338,7 @@ def _from_yfinance(ticker: str) -> dict:
     }
 
 
-# ─── stockanalysis.com 主页解析（公司概况 + 估值，无 Key）──
+# stockanalysis.com 主页解析（公司概况 + 估值，无 Key）
 
 def _sa_num_abbr(v):
     """解析缩写数值："5.42T +23.9%"→5.42e12，"253.49B"→2.53e11，"42,000"→42000"""
@@ -504,7 +487,7 @@ def valuation_fallback(ticker: str) -> dict:
     return out
 
 
-# ─── stockanalysis.com 免费财报解析（无 Key，覆盖全部美股）──
+# stockanalysis.com 免费财报解析（无 Key，覆盖全部美股）
 
 def _sa_fetch(url: str) -> str:
     """抓取 stockanalysis 页面；失败抛异常"""
@@ -645,7 +628,7 @@ def _from_stockanalysis(ticker: str) -> dict:
     }
 
 
-# ─── 新浪财经摘要解析 ───────────────────────────────────
+# 新浪财经摘要解析
 
 def _norm_key(k: str) -> str:
     """键名规范化：小写、去下划线/空格/括号，便于模糊匹配"""
@@ -713,7 +696,7 @@ def _from_sina(ticker: str) -> dict:
     }
 
 
-# ─── 对外入口 ───────────────────────────────────────────
+# 对外入口
 
 def _empty(ticker: str, source: str = "none") -> dict:
     return {"symbol": str(ticker).upper(), "source": source,

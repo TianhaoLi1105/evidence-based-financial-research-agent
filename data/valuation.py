@@ -1,19 +1,4 @@
-"""
-Valuation Module (V3.4.3)
-=========================
-估值相对位置：判断一只股票「贵不贵」，给出有依据的结论。
-
-实现两个免费数据能力：
-1. 自身估值：当前价、PE、市值、52 周高低（腾讯报价 → stockanalysis 兜底）
-2. 同行对比：按行业/板块关键词映射出同行大盘股，拉取同行 PE/市值，
-   计算行业中位数 PE，得到「PE 相对行业中位数溢价」
-
-设计原则（沿用项目哲学）：
-- 接口失败静默降级，字段允许 None，不编造
-- 历史 PE 分位（52 周 PE 区间）免费源拿不到 → 用「52 周价格位置 + 同行 PE 中位数」
-  两个可验证维度替代，并在 notes 里如实说明
-- 同行映射是静态字典（覆盖主流行业），匹配不到的行业如实返回空 peers
-"""
+"""Compare a stock's P/E with peers and its price with the 52-week range."""
 
 import statistics as _stat
 
@@ -21,7 +6,7 @@ from utils import safe_float
 from services.stock_service import _quote_with_fallback
 from data.fundamentals import _from_stockanalysis_profile
 
-# ─── 行业 → 同行大盘股映射 ───────────────────────────────
+# 行业 → 同行大盘股映射
 # 顺序敏感：先命中先使用（semiconductor 必须排在 technology 之前）。
 # 每行业 6-8 只，市值靠前、数据可得性高。目标股票自身会被自动剔除。
 

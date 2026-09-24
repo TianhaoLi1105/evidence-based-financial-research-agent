@@ -1,13 +1,4 @@
-"""
-News Module (V3.4.2)
-====================
-公司新闻：东财新闻搜索（免费、国内可达）→ Google News RSS 兜底（海外可用）。
-缓存 1 小时。返回 [{title, date, source, url, snippet}]。
-
-设计原则（沿用项目哲学）：
-- 接口失败静默降级，不抛异常（返回空列表 + source="none"）
-- 情绪打分由 LLM 完成（工具只提供标题/日期/来源/摘要，不编造观点）
-"""
+"""Fetch company headlines from East Money with Google News fallback."""
 
 import json as _json
 import os

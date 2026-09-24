@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 全量回归测试（mock 数据源，无需网络）
+# 运行全部离线测试组
 set -e
 cd "$(dirname "$0")/.."
 # Existing integration fixtures intentionally exercise the trusted local disk mode.

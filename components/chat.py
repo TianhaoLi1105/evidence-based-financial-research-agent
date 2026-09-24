@@ -1,14 +1,4 @@
-"""
-Chat Component (V3.2.3)
-=======================
-右下角悬浮 AI 助手：交互 UI（悬浮按钮、抽屉、输入框）由官方组件 iframe 承载
-（HTML/CSS/JS 完全可控、定位可靠），消息区由 Python 渲染为固定浮层，
-两者用组件返回值（Streamlit.setComponentValue）通信。
-
-- 消息历史存 session_state，支持多轮追问
-- 消息区独立滚动容器（column-reverse：新增内容自动锚定底部）
-- 流式输出（打字机效果）
-"""
+"""Render the floating chat panel and stream tool-backed responses."""
 
 import base64
 import html as _html
@@ -44,7 +34,7 @@ _DEEP_RE = re.compile(
     r"|in[- ]depth\s*analysis|comprehensive\s*analysis)",
     re.I)
 
-# 画图意图识别（V3.3.2）：命中后注入 plot_chart 指令，避免模型只回文字不调工具
+# 画图意图识别：命中后注入 plot_chart 指令，避免模型只回文字不调工具
 _CHART_RE = re.compile(
     r"(画图|画个图|画一下|画一张|画张|画幅|图表|K线|蜡烛图|折线图|走势图|趋势图|价格图|对比图"
     r"|draw\s+a|draw\s+the|plot\s+a|plot\s+the|chart|candlestick|k[- ]?line|price\s+trend|graph)",
@@ -64,7 +54,7 @@ FAB_EDGE = 8          # AI 球距视口边缘的最小间距
 MINI_H = 48           # 最小化后抽屉的高度（只保留顶栏）
 
 
-# ─── 轻量 markdown → HTML（聊天消息用，支持常用语法）──────
+# 轻量 markdown → HTML（聊天消息用，支持常用语法）
 
 def _esc(s: str) -> str:
     return _html.escape(s, quote=False)
@@ -94,7 +84,7 @@ def _inline(s: str) -> str:
     s = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", s)
     s = re.sub(r"\*([^*]+)\*", r"<em>\1</em>", s)
     s = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", _safe_href, s)
-    # V3.4.4：数据来源逐条标注 → 灰色小标签
+    # 数据来源逐条标注 → 灰色小标签
     s = re.sub(r"（来源：([^）]+)）", r'<span class="src-tag">来源：\1</span>', s)
     s = re.sub(r"\(Source: ([^)]+)\)", r'<span class="src-tag">Source: \1</span>', s)
     return s
@@ -175,7 +165,7 @@ def _md_to_html(text: str) -> str:
     return "".join(out)
 
 
-# ─── 消息渲染 ───────────────────────────────────────────
+# 消息渲染
 
 def _bubble(role: str, content_html: str) -> str:
     return f'<div class="chat-bubble chat-bubble-{role}">{content_html}</div>'
@@ -188,7 +178,7 @@ def _messages_html(messages: list, lang: str, hint=None,
     hint:            工具调用轨迹（str 或 str 列表，逐行显示“正在查询…”）
     report_download: 深度分析研报下载入口的 HTML（由 _report_download_html 生成）
     pending_charts:  工具刚生成的图表 HTML（流式阶段先显示，不等回答文本完成）
-    对话内图表：最终存放在 assistant 消息的 "charts" 字段里（V3.3.2），
+    对话内图表：最终存放在 assistant 消息的 "charts" 字段里，
     随聊天记录一起持久化，刷新页面后仍然显示。
     """
     disclaimer = f'<div class="chat-disclaimer">{t("chat_ai_disclaimer", lang)}</div>'
@@ -222,7 +212,7 @@ def _messages_html(messages: list, lang: str, hint=None,
     bubbles = []
     for i, m in enumerate(reversed(messages)):
         content_html = _md_to_html(m.get("content", ""))
-        # 对话内出图（V3.3.2）：图表内嵌在消息里，随历史刷新后仍显示
+        # 对话内出图：图表内嵌在消息里，随历史刷新后仍显示
         if m.get("charts") and m.get("role") == "assistant":
             content_html += "".join(
                 f'<div class="chat-chart">{c}</div>' for c in m["charts"])
@@ -233,7 +223,7 @@ def _messages_html(messages: list, lang: str, hint=None,
     return f'<div id="chat-msgs">{disclaimer}{extra}{"".join(bubbles)}</div>'
 
 
-# ─── 深度分析（V3.2.3）─────────────────────────────────
+# 深度分析
 
 def _is_deep_request(text: str) -> bool:
     """判断用户消息是否为「深度分析/研报」请求（命中后走完整工具链）"""
@@ -268,7 +258,7 @@ def _extract_tickers(text: str) -> list:
 
 
 def _server_chart_fallback(text: str, lang: str) -> list:
-    """服务端兜底出图（V3.3.2）：模型漏调 plot_chart 时，系统直接生成图表。
+    """服务端兜底出图：模型漏调 plot_chart 时，系统直接生成图表。
 
     只对明确画图请求生效：消息里有股票代码优先用它，否则用当前页面股票；
     消息提到 K 线/蜡烛 → candlestick，否则 line；多只 → 对比折线图。
@@ -353,7 +343,7 @@ footer{margin-top:44px;padding-top:18px;border-top:1px solid #38383a;
 
 
 def _merge_review(text: str, review: str, lang: str) -> str:
-    """V3.4.4：把风控审阅内容合并进研报。
+    """把风控审阅内容合并进研报。
 
     模型输出本身会带「风险复核意见」标题 → 已含标题时不重复添加。
     """
@@ -383,7 +373,7 @@ def _report_html(text: str, lang: str) -> str:
             f'<footer>{_esc(footer)}</footer></div></body></html>')
 
 
-# ─── 模型状态 ───────────────────────────────────────────
+# 模型状态
 
 def _active_profile(profiles: list) -> dict:
     """返回当前使用的模型配置（无配置时返回空 dict）"""
@@ -422,7 +412,7 @@ def _append(message: dict, session_id: str = None, target: list = None) -> None:
         chat_store.append_message(sid, message)
 
 
-# ─── 会话持久化（V3.2.2a）───────────────────────────────
+# 会话持久化
 
 def _ensure_chat_session() -> None:
     """首次渲染时恢复上次的会话（含历史消息），没有则新建一个"""
@@ -673,7 +663,7 @@ def _context_text(lang: str) -> str:
     if wl:
         lines.append(t("ctx_watchlist", lang,
                        tickers="、".join(str(x).upper() for x in wl)))
-    # V3.3.3 个性化档案（行为隐式学习）：常看股票 + 关注维度
+    # 个性化档案（行为隐式学习）：常看股票 + 关注维度
     stocks = top_stocks(3)
     topics = [t(f"topic_{tp}", lang) for tp in top_topics(2)]
     if stocks or topics:
@@ -683,7 +673,7 @@ def _context_text(lang: str) -> str:
     return "\n".join(lines)
 
 
-# ─── 组件交互：动作处理 ─────────────────────────────────
+# 组件交互：动作处理
 
 def handle_ai_action(val, lang: str) -> None:
     """处理组件 iframe 传来的动作（toggle / close / clear / send）"""
@@ -723,18 +713,18 @@ def handle_ai_action(val, lang: str) -> None:
     elif action == "send":
         text = str(val.get("text") or "").strip()
         if text:
-            # V3.3.3 个性化记忆：记录提问话题与涉及的股票（隐式学习）
+            # 个性化记忆：记录提问话题与涉及的股票（隐式学习）
             record_question(text)
             for tk in _extract_tickers(text):
                 record_stock(tk)
-            # V3.2.2c：记录该话题在讨论什么（页面模式/股票/周期快照）
+            # 记录该话题在讨论什么（页面模式/股票/周期快照）
             chat_store.set_session_context(
                 st.session_state.get("chat_session_id"), _page_state())
             _append({"role": "user", "content": text})
-# ─── 组件调用（fab + 抽屉 UI 在 index.html 中，参数经 RENDER 消息下发）──
+# 组件调用（fab + 抽屉 UI 在 index.html 中，参数经 RENDER 消息下发）
 
 def _panel_args(lang: str, show: bool) -> dict:
-    """传给组件前端的文案与状态参数（含话题列表，V3.2.2b）"""
+    """传给组件前端的文案与状态参数（含话题列表，）"""
     show_threads = st.session_state.get("show_threads", False)
     # 深度分析快捷按钮：优先带当前页面股票（"深度分析 AAPL"），无则裸提示
     deep_label = t("chat_q_deep", lang)
@@ -768,14 +758,14 @@ def _panel_args(lang: str, show: bool) -> dict:
 
 
 def _panel_css(show: bool, show_mini: bool = False, show_quick: bool = True) -> str:
-    """注入组件 iframe 与消息区浮层的兜底样式（默认右下角，V3.2.2d 起无遮罩）。
+    """注入组件 iframe 与消息区浮层的兜底样式（默认右下角，起无遮罩）。
 
     定位的权威在 iframe 内 JS（components/ai_frontend/index.html 的 layout()）：
     开/关抽屉、最小化、窗口缩放都由 JS 用「内联 !important」直接设置 iframe 与
     #chat-msgs 的位置/尺寸。这里只保留 JS 生效前的右下角兜底，避免 Python CSS 与
     JS 内联样式互相覆盖，导致 iframe 缩回 56px（“半个输入框”）或两框错位。
 
-    V3.2.2d：不再渲染全屏遮罩（背景页面保持清晰、可滚动、可交互），
+    不再渲染全屏遮罩（背景页面保持清晰、可滚动、可交互），
     抽屉与页面平级共存；阴影加在 iframe 本身（父页面绘制，不被 iframe 裁剪）。
     """
     msgs_base = (f'position:fixed!important;z-index:9600!important;'
@@ -861,7 +851,7 @@ def render_ai_panel() -> None:
         st.session_state.ai_panel_value = val
         handle_ai_action(val, lang)
 
-    # 2) 定位样式（用处理动作后的最新状态；V3.2.2d 起无遮罩，背景页面始终可交互）
+    # 2) 定位样式（用处理动作后的最新状态；起无遮罩，背景页面始终可交互）
     show = st.session_state.show_chat
     st.markdown(_panel_css(show, st.session_state.get("show_mini", False),
                            not st.session_state.chat_messages),
@@ -943,7 +933,7 @@ def _render_messages(box, lang: str) -> None:
                     )
         if not text:
             text = t("llm_error_empty", lang)
-        # V3.4.4：分析师→风控二次审阅（可选开关；研报生成成功后才触发）
+        # 分析师→风控二次审阅（可选开关；研报生成成功后才触发）
         if deep and text and get_deep_review():
             hints.append(t("deep_review_running", lang))
             box.markdown(
@@ -966,11 +956,11 @@ def _render_messages(box, lang: str) -> None:
                         unsafe_allow_html=True,
                     )
             text = _merge_review(text, review, lang)
-        # 兜底出图（V3.3.2）：模型漏调 plot_chart 时系统直接生成，
+        # 兜底出图：模型漏调 plot_chart 时系统直接生成，
         # 保证「画图」请求一定有图，不再依赖模型自觉
         if chart_req and not charts:
             charts = _server_chart_fallback(current[-1].get("content", ""), lang)
-        # 图表随回答一起存入消息（V3.3.2）：磁盘持久化，刷新后仍显示
+        # 图表随回答一起存入消息：磁盘持久化，刷新后仍显示
         assistant_msg = {"role": "assistant", "content": text}
         if charts:
             assistant_msg["charts"] = charts

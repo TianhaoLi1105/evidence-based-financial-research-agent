@@ -37,7 +37,7 @@ def save_config(data: dict) -> None:
         json.dump(merged, f)
 
 
-# ─── AI 模型配置（V3 智能问答）────────────────────────────
+# AI 模型配置（智能问答）
 def get_llm_profiles() -> list:
     """读取已保存的 AI 模型配置列表"""
     return load_config().get("llm_profiles", [])

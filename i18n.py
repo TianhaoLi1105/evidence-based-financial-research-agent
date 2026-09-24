@@ -56,7 +56,7 @@ TRANSLATIONS = {
         # Mode tabs
         "mode_single": "Single Stock",
         "mode_compare": "Compare",
-        # Chat / LLM (V3)
+        # Chat / LLM ()
         "chat_welcome_title": "AI Financial Assistant",
         "chat_welcome_hint": "Ask about financial concepts — or ask for live data (prices, fundamentals, indicators) and I will look it up in real time.",
         "chat_input_placeholder": "Ask a financial question…",
@@ -86,19 +86,19 @@ TRANSLATIONS = {
         "chat_q_pe": "What is P/E ratio?",
         "chat_q_macd": "How to read MACD?",
         "chat_q_indices": "3 major US indices?",
-        # Chat context (V3.2.2a: 页面上下文感知)
+        # Chat context (页面上下文感知)
         "ctx_page_title": "Current page context:",
         "ctx_mode_single": "Mode: Single-stock analysis \u00b7 Ticker: {ticker} \u00b7 Period: {period}",
         "ctx_mode_compare": "Mode: Multi-stock comparison \u00b7 Tickers: {tickers}",
         "ctx_mode_idle": "Mode: no stock analyzed yet",
-        # Chat context (V3.2.2c: 页面数据注入 + 话题主题)
+        # Chat context (页面数据注入 + 话题主题)
         "ctx_thread_topic": "Conversation topic: {topic}",
         "ctx_data_single": "Page data (as shown on this page) for {ticker}:",
         "ctx_data_compare": "Page data (as shown on this page) for the comparison:",
         "ctx_data_rules": "Rules: the data above is exactly what the user is currently viewing. Answer questions about it directly from this data — do NOT call tools for it. If the user asks about other stocks or data not listed above, use the available tools. When quoting page data, note it is 'as shown on the page'.",
         "ctx_watchlist": "User's watchlist (stocks they follow): {tickers}",
         "ctx_profile": "User profile (learned from activity): favorite stocks {stocks}; interests {topics}.",
-        # Chat threads (V3.2.2b: 多话题)
+        # Chat threads (多话题)
         "threads_title": "Threads",
         "thread_new": "New Chat",
         "thread_empty": "No conversations yet",
@@ -289,7 +289,7 @@ TRANSLATIONS = {
         # Mode tabs
         "mode_single": "单股分析",
         "mode_compare": "多股对比",
-        # Chat / LLM (V3)
+        # Chat / LLM ()
         "chat_welcome_title": "AI 金融助手",
         "chat_welcome_hint": "可以问我金融概念，也可以直接要实时数据——我能实时查询行情、财务指标与技术指标。",
         "chat_input_placeholder": "输入金融问题…",
@@ -319,19 +319,19 @@ TRANSLATIONS = {
         "chat_q_pe": "什么是市盈率？",
         "chat_q_macd": "MACD 怎么用？",
         "chat_q_indices": "美股三大指数是什么？",
-        # Chat context (V3.2.2a: 页面上下文感知)
+        # Chat context (页面上下文感知)
         "ctx_page_title": "当前页面上下文：",
         "ctx_mode_single": "模式：单股分析 \u00b7 股票：{ticker} \u00b7 周期：{period}",
         "ctx_mode_compare": "模式：多股对比 \u00b7 股票：{tickers}",
         "ctx_mode_idle": "模式：尚未分析任何股票",
-        # Chat context (V3.2.2c: 页面数据注入 + 话题主题)
+        # Chat context (页面数据注入 + 话题主题)
         "ctx_thread_topic": "本话题主题：{topic}",
         "ctx_data_single": "页面数据（与页面显示一致）{ticker}：",
         "ctx_data_compare": "页面数据（与页面显示一致）对比：",
         "ctx_data_rules": "使用规则：以上数据就是用户当前在页面上看到的内容；涉及这些数据的问题请直接引用回答，不要调用工具。用户询问其他股票或未列出的数据时再调用工具。引用页面数据时注明「以页面显示为准」。",
         "ctx_watchlist": "用户自选股（用户关注的标的）：{tickers}",
         "ctx_profile": "用户个性化档案（根据使用行为自动学习）：常看股票 {stocks}；关注维度 {topics}。",
-        # Chat threads (V3.2.2b: 多话题)
+        # Chat threads (多话题)
         "threads_title": "话题",
         "thread_new": "新建对话",
         "thread_empty": "还没有对话",
@@ -488,7 +488,7 @@ def get_period_options(lang: str) -> dict:
     }
 
 
-# ─── 行业术语中英映射（用于公司概况字段本地化）────────────
+# 行业术语中英映射（用于公司概况字段本地化）
 SECTOR_TRANSLATIONS = {
     "Technology": "科技",
     "Consumer Electronics": "消费电子",

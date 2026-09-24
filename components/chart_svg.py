@@ -1,16 +1,8 @@
-"""
-Chat Chart SVG (V3.3.2)
-=======================
-对话内出图：把价格数据渲染成 Apple 深色风格的 SVG 图表，
-以 HTML 字符串形式嵌入聊天消息区（#chat-msgs 浮层）。
-
-纯函数实现，不依赖 plotly/streamlit，可独立单元测试。
-颜色约定与页面图表一致：绿涨 #34c759 / 红跌 #ff3b30 / 主蓝 #0a84ff。
-"""
+"""Render dependency-free SVG price charts for chat messages."""
 
 import math
 
-# ─── 色板（与 services/app_state.py 的 C 一致）───
+# 色板（与 services/app_state.py 的 C 一致）
 BLUE = "#0a84ff"
 GREEN = "#34c759"
 RED = "#ff3b30"

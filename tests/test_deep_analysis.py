@@ -1,4 +1,4 @@
-"""V3.2.3 深度分析回归：意图识别 / 轨迹布局 / 双格式下载 / 轮数提升 / 快捷按钮"""
+"""深度分析的意图识别、界面与报告下载测试。"""
 import base64, json, os, sys, tempfile
 from unittest import mock
 
@@ -13,7 +13,6 @@ from agent.executor import MAX_ROUNDS
 import agent.executor as ex
 import types
 
-# ── 1. 深度分析意图识别（中/英）──
 assert _is_deep_request("深度分析 AAPL")
 assert _is_deep_request("帮我写一份 AAPL 的研报")
 assert _is_deep_request("Deep analysis of MSFT")
@@ -23,7 +22,6 @@ assert not _is_deep_request("什么是 RSI")
 assert not _is_deep_request("")
 print("PASS deep request detection")
 
-# ── 2. 消息区：工具轨迹多行 + 布局（轨迹贴近视口底部）──
 MSGS = [{"role": "user", "content": "深度分析 AAPL"}]
 h = _messages_html(MSGS, "zh", hint=["正在获取 AAPL 的实时行情…",
                                       "正在获取 AAPL 的财务数据…"])
@@ -39,7 +37,6 @@ assert h2.count('class="chat-tool-step"') == 1
 assert 'chat-tool-hint' not in _messages_html(MSGS, "zh")
 print("PASS multi-line tool trace")
 
-# ── 3. 研报下载：HTML 精美报告 + Markdown 双格式 ──
 d = _report_download_html("zh", "## 公司概况\n\nAAPL\n\n## 结论\n\n数据来源：twelvedata")
 assert d.count('class="chat-report-download"') == 2, d
 assert 'href="data:text/html;base64,' in d
@@ -57,13 +54,11 @@ assert _report_download_html("zh", "   ") == ""
 assert _report_html("x", "en").startswith("<!DOCTYPE html>")
 print("PASS dual-format report download")
 
-# ── 3b. markdown 表格 → HTML（报告排版用）──
 tbl = _md_to_html("| 指标 | 数值 |\n| --- | --- |\n| PE | 31.2 |")
 assert "overflow-x:auto" in tbl and "white-space:nowrap" in tbl, tbl  # 横向滚动 + 横排
 assert "<table" in tbl and "<th" in tbl and "指标" in tbl and "31.2" in tbl, tbl
 print("PASS markdown table")
 
-# ── 3c. 快捷按钮：深度分析自动带当前股票 ──
 class FakeSS(dict):
     def __getattr__(self, k):
         try: return self[k]
@@ -83,7 +78,6 @@ with mock.patch.object(chat.st, "session_state", ss2):
     assert _panel_args("zh", True)["quick_labels"][0] == "深度分析"
 print("PASS deep quick label")
 
-# ── 4. executor：一轮并行多个工具 + max_rounds 生效 ──
 class FakeDelta:
     def __init__(self, content=None, tool_calls=None):
         self.content = content
@@ -141,7 +135,6 @@ assert "## 公司概况" in full
 assert len(calls) == 2, len(calls)
 print("PASS executor 4-tool parallel round")
 
-# ── 5. AppTest：深度分析端到端（下载入口 + 轮数 + 指令注入）──
 from streamlit.testing.v1 import AppTest
 tmp_cfg = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
 tmp_cfg.write('{"api_key": "test-demo-key", "watchlist": ["AAPL"]}')
@@ -204,4 +197,4 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
     assert "data:text/markdown;base64," not in md2
     print("PASS AppTest deep analysis e2e")
 
-print("\nALL V3.2.3 TESTS PASSED")
+print("\nALL TESTS PASSED")

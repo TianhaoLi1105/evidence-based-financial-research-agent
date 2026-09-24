@@ -1,4 +1,4 @@
-"""V3.3.2 AppTest：真实链路复现——用户在 AI 框发画图消息，
+"""AppTest：真实链路复现——用户在 AI 框发画图消息，
 mock run_agent 产出 tool 事件(含图表HTML) + 文本，检查最终渲染的 HTML 里有图表。"""
 import os, sys, tempfile
 from unittest import mock

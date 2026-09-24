@@ -4,17 +4,17 @@
 
 [![Regression Tests](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml/badge.svg)](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml)
 
-**A real-data financial research assistant** — enter a ticker to get quotes, fundamentals, news, and AI-generated deep research reports.
+A Python financial research application that combines market-data APIs with an LLM tool-calling agent.
 
-Built with [Streamlit](https://streamlit.io). All data comes from **free data sources** with automatic multi-source fallback. It ships with a conversational **AI Agent** (DeepSeek / Qwen / Zhipu GLM / OpenAI / Ollama) that produces professional research reports with per-claim source citations and an independent risk-review pass.
+I built it to explore how an LLM can answer financial questions using retrieved data instead of relying only on model knowledge. The application uses free data sources and falls back to alternate providers when one is unavailable.
 
 > ⚠️ This project is for learning and research only. Nothing here constitutes investment advice.
 
 ---
 
-## ✨ Highlights
+## Highlights
 
-### 📈 Market Analytics (V1–V2)
+### Market Analytics
 - Candlestick charts for any US stock (daily / weekly / monthly) with time-range switching
 - Technical indicators: MA20 / MA60 / EMA12/26 / MACD / BOLL / RSI14
 - Company profiles: description, industry, sector, CEO, employee count, website (free-source fallback)
@@ -22,25 +22,25 @@ Built with [Streamlit](https://streamlit.io). All data comes from **free data so
 - Multi-stock comparison: normalized trend chart + valuation/fundamental comparison table + watchlist
 - Market overview (three major indices) and K-line CSV export
 
-### 🤖 AI Agent (V3)
-- Floating chat window with streaming output and multi-topic conversations (persisted locally)
+### AI Agent
+- Floating chat window with streaming output and multi-topic conversations
 - **9 data tools**: real-time quotes, historical K-lines, deep fundamentals, company profile, technical indicators, multi-stock comparison, valuation assessment, news sentiment, in-chat charting
-- **Deep research report**: automatically runs the full tool chain and outputs a 6-chapter structured report (company overview / financials & valuation / technicals / key risks / data self-check / conclusion), downloadable as HTML or Markdown
-- **Per-claim source citation**: every key number is attributed to its source — no fabrication
+- **Research report**: runs the relevant tools and outputs a structured report, downloadable as HTML or Markdown
+- **Source attribution**: key numbers carry their data source; missing values are shown as N/A
 - **Analyst → Risk review** (optional): an independent risk-review role re-checks data support and flags gaps or missed risks
 - **Valuation check**: ask "Is AAPL expensive right now?" → compares against industry peers and the 52-week price position
 - **News & sentiment**: fetches company news and scores headline sentiment
 - In-chat chart generation (K-line / line / multi-stock comparison)
 - Personalized memory: remembers frequently viewed tickers and topics, injected into conversation context
 
-### 🌍 Experience
+### Experience
 - One-click Chinese / English switching (language preference remembered)
-- Apple-style dark UI, no third-party tracking
+- Dark UI with Chinese and English support
 - Switch between multiple models: DeepSeek / Qwen / GLM / OpenAI / Ollama / custom endpoint
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 Screenshots live in `docs/screenshots/` (regenerate with the bundled script on first run):
 
@@ -58,7 +58,7 @@ python scripts/capture_screenshots.py   # requires playwright
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Requirements
 - Python **3.9+**
@@ -107,7 +107,7 @@ Open `http://localhost:8501`; stop it with `docker compose down`.
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ```
 app.py                    # Streamlit entry: single-stock / compare / market overview
@@ -137,25 +137,26 @@ app.py                    # Streamlit entry: single-stock / compare / market ove
 | News | East Money → Google News |
 | Valuation | Tencent/stockanalysis + local computation (peer mapping + 52-week percentile) |
 
-Every result carries a `source` field; failures degrade silently, missing fields show as N/A — **nothing is ever fabricated**.
+Results carry a `source` field where available, and missing fields are shown as N/A.
 
 ---
 
-## ✅ Testing
+## Testing
 
 The project maintains 18 regression test groups (tool layer, fallback chains, AI event stream, rendering, memory, and evaluation — all with **mocked data sources, no network needed**):
 
 ```bash
 bash tests/run_all.sh        # run all 18 groups at once
-python tests/test_v343.py    # run a single group (e.g. valuation)
+python tests/test_valuation.py  # run one group
 ```
 
 | Test files | Coverage |
 | --- | --- |
-| `tests/test_v31_*.py` | LLM client, message assembly, i18n, app flow |
-| `tests/test_v32_*.py` | tool layer, deep analysis, charts, chart fallback |
-| `tests/test_v33_*.py` | context enhancement, chart persistence, personalized memory |
-| `tests/test_v341.py` – `test_v345.py` | fundamentals, news sentiment, valuation, report/risk review, wrap-up |
+| `tests/test_agent_*.py` / `test_app_integration.py` | LLM client, message assembly, tools, i18n, app flow |
+| `tests/test_chart_*.py` / `test_chat_charts.py` | chart generation, rendering, persistence, and fallback |
+| `tests/test_fundamentals.py` / `test_news.py` / `test_valuation.py` | data parsing, provider fallback, sentiment, and valuation |
+| `tests/test_deep_analysis.py` / `test_risk_review.py` | research flow, report export, and risk review |
+| `tests/test_comparison_context.py` / `test_preferences.py` | comparison context and personalized memory |
 | `tests/test_lang_mem.py` / `test_chat_store.py` | language memory, multi-topic storage |
 | `tests/test_security_provenance.py` / `test_evaluation.py` | session isolation, provenance, evaluation data and metrics |
 
@@ -175,7 +176,7 @@ GitHub Actions runs all 18 offline regression groups and builds the Docker image
 
 ---
 
-## 🔒 Privacy & Security
+## Privacy & Security
 
 - **Session isolation by default**: API keys, model profiles, and chat history live only in the current Streamlit session's server memory, isolated from other visitors
 - **Optional single-user persistence**: `AGENT_LOCAL_PERSISTENCE=1` uses `.agent_config.json` and `chat_history.json` (both gitignored)
@@ -185,21 +186,21 @@ GitHub Actions runs all 18 offline regression groups and builds the Docker image
 
 ---
 
-## 📄 Disclaimer
+## Disclaimer
 
 For **learning and research** purposes only. All data comes from public free endpoints and may be delayed or incomplete; AI-generated content is for reference only and **does not constitute investment advice**. Markets involve risk — invest carefully.
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 
-- [x] V1 Basic market analytics site
-- [x] V2 Multi-stock comparison + company profiles + CSV export
-- [x] V3 AI Agent (tool layer / multi-topic chat / charting / deep fundamentals / news sentiment / valuation / risk review)
-- [ ] V4: More data sources (backup APIs), multi-stock comparison Q&A, PDF report export
+- [x] Basic market analytics
+- [x] Multi-stock comparison, company profiles, and CSV export
+- [x] Tool-calling agent, multi-topic chat, charting, fundamentals, news, valuation, and risk review
+- [ ] More backup data sources, multi-stock comparison Q&A, and PDF report export
 
 ---
 
-## 📄 License
+## License
 
 [MIT](LICENSE) © 2026 Evidence-Based Financial Research Agent contributors

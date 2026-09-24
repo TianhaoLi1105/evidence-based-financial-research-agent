@@ -1,17 +1,4 @@
-"""
-User Preference Memory (V3.3.3)
-================================
-个性化记忆：隐式学习用户行为，建立轻量档案，注入 AI 上下文。
-
-档案内容（全部本地存储，不联网）：
-- stocks：分析过 / 对比过 / 在 AI 里问过的股票 → 频率 + 最近时间
-- topics：提问话题分类（技术面 / 基本面 / 行情速览）→ 各维度计数
-
-设计要点：
-- 计数封顶（单只股票最多 999 次），避免长期使用后数值膨胀
-- 写 .agent_config.json 的 preferences 字段（复用 storage 原子合并写入）
-- 分类可多标签命中（如「RSI 和 PE 哪个更有用」同时记技术面 + 基本面）
-"""
+"""Track frequently viewed stocks and question topics for local context."""
 
 import re
 import time
@@ -22,7 +9,7 @@ MAX_COUNT = 999       # 单只股票计数上限（防止膨胀）
 TOP_N = 5             # 注入/展示时取最常看的股票数
 KEY = "preferences"   # .agent_config.json 里的字段名
 
-# ─── 话题分类规则（可多标签命中）──────────────────────────
+# 话题分类规则（可多标签命中）
 _TECH_RE = re.compile(
     r"(rsi|macd|kdj|boll|布林|均线|ma\d|ema|技术|k线|k线图|蜡烛|指标|超买|超卖"
     r"|金叉|死叉|成交量|volume|trend|momentum|支撑|压力|背离|形态)",
@@ -109,7 +96,7 @@ def top_topics(n: int = 2) -> list:
 
 
 def get_deep_review() -> bool:
-    """分析师→风控二次审阅开关（V3.4.4）"""
+    """分析师→风控二次审阅开关"""
     return bool(_prefs().get("deep_review", False))
 
 

@@ -10,7 +10,7 @@ from data.storage import load_config
 from data.finance_data import set_api_key
 from i18n import get_language_options
 
-# ─── Apple 风格深色主题色板 ─────────────────────────────
+# Apple 风格深色主题色板
 C = {
     "bg": "#1c1c1e", "bg2": "#2c2c2e", "card": "#2c2c2e",
     "text": "#f5f5f7", "text2": "#d1d1d6", "text3": "#98989d",
@@ -103,7 +103,7 @@ def apply_css() -> None:
     div[data-baseweb="tab-highlight"]{{background-color:{C["accent"]}!important}}
     #MainMenu,footer,.stDeployButton{{display:none!important}}
 
-    /* ── AI 助手（V3.1.2：组件 iframe + 消息区浮层）── */
+    /* ── AI 助手（组件 iframe + 消息区浮层）── */
     iframe[data-testid="stIFrame"]{{border:none!important;background:transparent!important}}
     .chat-bubble{{margin:4px 0!important;padding:10px 14px!important;border-radius:16px!important;max-width:88%!important;font-size:.875rem!important;line-height:1.55!important;word-break:break-word!important}}
     .chat-bubble-user{{margin-left:auto!important;background:{C["accent"]}!important;color:#fff!important;border-bottom-right-radius:6px!important}}

@@ -1,4 +1,4 @@
-"""V3.3.2 回归：对话内出图（SVG 生成 / plot_chart 工具 / executor 传递 / 消息区渲染）"""
+"""对话内 SVG 图表的生成、传递与渲染测试。"""
 import json, os, sys, types
 from unittest import mock
 
@@ -19,7 +19,6 @@ QUOTES = {"AAPL": {"name": "Apple Inc.", "close": 131.0},
           "MSFT": {"name": "Microsoft Corp.", "close": 210.0}}
 HIST = {"AAPL": ROWS, "MSFT": ROWS}
 
-# ── 1. SVG 生成器 ──
 from components.chart_svg import price_line_svg, candlestick_svg, multi_line_svg
 up = price_line_svg(ROWS)
 down = price_line_svg(ROWS_DOWN)
@@ -34,7 +33,6 @@ assert "<svg" in m and "polyline" in m and "AAPL" in m and "MSFT" in m
 assert "%.1f" not in m  # 图例含格式化涨跌
 print("PASS svg generators (up/down/candlestick/multi)")
 
-# ── 2. plot_chart 工具 ──
 with mock.patch.object(at, "_time_series_with_fallback",
                        return_value=(list(ROWS), "cache")):
     out = at.tool_plot_chart(["AAPL"])
@@ -58,7 +56,6 @@ with mock.patch.object(at, "_time_series_with_fallback", return_value=([], "cach
     assert "error" in err and "_chart_html" not in err
 print("PASS plot_chart tool")
 
-# ── 3. executor：图表 HTML 只进 UI 不进模型消息 ──
 class FakeDelta:
     def __init__(self, content=None, tool_calls=None):
         self.content = content
@@ -110,7 +107,6 @@ assert "<svg" not in tool_msg["content"]
 assert "chart generated" in tool_msg["content"]
 print("PASS executor passes chart HTML to UI only")
 
-# ── 4. 消息区渲染 + 持久化（图表存在消息 dict 的 charts 字段里）──
 msgs = [{"role": "user", "content": "画一下 AAPL 的走势"},
         {"role": "assistant", "content": "这是 AAPL 的走势图。", "charts": [up]}]
 h = _messages_html(msgs, "zh")
@@ -135,7 +131,6 @@ assert loaded and "<svg" in loaded[0]["charts"][0]
 cs.delete_session(sid)
 print("PASS messages render charts + persistence round-trip")
 
-# ── 5. 提示词与 schema ──
 zh = build_system_prompt("zh")
 en = build_system_prompt("en")
 assert "plot_chart" in zh and "画图" in zh and "K线" in zh
@@ -154,13 +149,11 @@ for q in ["AAPL 的市盈率是多少", "解释一下 RSI", "深度分析 AAPL",
     assert not _is_chart_request(q), q
 print("PASS prompts/schema + chart intent detection")
 
-# ── 6. 流式阶段：pending_charts 立即显示（不等最终回答）──
 h2 = _messages_html(msgs, "zh", hint=["正在获取价格图表…"], pending_charts=[up])
 assert "chat-pending-charts" in h2 and "chat-chart" in h2 and "<svg" in h2
 assert "chat-tool-hint" in h2
 print("PASS pending charts render during streaming")
 
-# ── 7. 服务端兜底出图（模型漏调工具时）──
 from components.chat import _extract_tickers, _server_chart_fallback
 assert _extract_tickers("画一下 AAPL 的K线") == ["AAPL"]
 assert _extract_tickers("对比 aapl 和 msft 走势") == ["AAPL", "MSFT"]
@@ -176,4 +169,4 @@ with mock.patch.object(chat, "tool_plot_chart", _fake_plot):
     assert _server_chart_fallback("解释一下RSI", "zh") == []    # 概念题不触发
 print("PASS server-side chart fallback (intent + ticker extraction)")
 
-print("\nALL V3.3.2 TESTS PASSED")
+print("\nALL TESTS PASSED")

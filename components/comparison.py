@@ -113,7 +113,7 @@ def _fmt_money(v):
 
 
 def render_financials_table(fundamentals: dict):
-    """财务深度对比表（V3.4.1）：行为指标，列为股票。字段缺失显示 N/A。"""
+    """财务深度对比表：行为指标，列为股票。字段缺失显示 N/A。"""
     if not fundamentals:
         return
     lang = st.session_state.lang
@@ -173,7 +173,7 @@ def _source_label(source: str) -> str:
 
 def render_comparison(quotes: dict, histories: dict, period_label: str,
                       sources: dict = None, fundamentals: dict = None):
-    """渲染多股对比结果：归一化图 + 指标表 + 财务对比（V3.4.1）+ 数据来源"""
+    """渲染多股对比结果：归一化图 + 指标表 + 财务对比+ 数据来源"""
     if not quotes and not histories:
         st.markdown(
             f'<p style="color:{C["text3"]};">{t("no_compare_data", st.session_state.lang)}</p>',

@@ -1,4 +1,4 @@
-"""V3.3.1 回归：多股对比问答 + 个性化记忆（自选股注入）"""
+"""多股对比问答与自选股上下文测试。"""
 import json, os, sys, tempfile, types
 from unittest import mock
 
@@ -10,7 +10,6 @@ import agent.executor as ex
 import components.chat as chat
 from agent.prompts import build_system_prompt
 
-# ── 1. compare 工具结果含公司名 ──
 QUOTES = {"AAPL": {"name": "Apple Inc.", "close": 234.5, "percent_change": 1.2,
                    "pe_ratio": 30.1, "market_cap": 3.5e12},
           "MSFT": {"name": "Microsoft Corp.", "close": 410.2, "percent_change": -0.4,
@@ -33,7 +32,6 @@ assert a_item["name"] == "Apple Inc.", a_item
 assert a_item["pe_ratio"] == 30.1 and a_item["market_cap"] == 3.5e12
 print("PASS compare includes company name")
 
-# ── 2. 提示词含多股对比规则（en/zh）──
 zh = build_system_prompt("zh")
 en = build_system_prompt("en")
 assert "多股对比" in zh and "compare 工具一次性传入" in zh
@@ -42,7 +40,6 @@ schema = json.dumps(at.TOOL_SCHEMAS, ensure_ascii=False)
 assert "instead of calling get_quote" in schema
 print("PASS compare prompt rules (en/zh + schema)")
 
-# ── 3. 验收：多股对比问答完整链路（LLM 一轮 compare → 一轮回答）──
 class FakeDelta:
     def __init__(self, content=None, tool_calls=None):
         self.content = content
@@ -97,7 +94,6 @@ tool_msgs = [m for m in calls[1]["messages"] if m.get("role") == "tool"]
 assert "Apple Inc." in tool_msgs[0]["content"], tool_msgs[0]["content"][:200]
 print("PASS compare Q&A full pipeline")
 
-# ── 4. 个性化记忆：自选股注入上下文 ──
 tmp_cfg = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
 tmp_cfg.write(json.dumps({"api_key": "k", "lang": "zh", "watchlist": ["AAPL", "MSFT"]}))
 tmp_cfg.close()
@@ -130,4 +126,4 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg2.name), \
     assert "用户自选股" not in ctx2
 print("PASS watchlist injected into context")
 
-print("\nALL V3.3.1 TESTS PASSED")
+print("\nALL TESTS PASSED")

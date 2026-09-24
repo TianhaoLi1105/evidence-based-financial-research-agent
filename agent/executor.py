@@ -1,19 +1,4 @@
-"""
-Agent Executor (V3.2.1)
-=======================
-工具调用循环：让 LLM 通过 Function Calling 自主调用本地数据工具，
-基于真实数据回答；最多执行 max_rounds 轮，防止失控。
-
-对外接口：run_agent() 是一个生成器，逐段产出事件 dict：
-    {"t": "text", "c": "文本片段"}    → 追加到回答的流式输出
-    {"t": "tool", "c": "提示文案"}    → 显示一条“正在查询…”的过程提示
-
-兼容性：
-- 不支持 tools 的模型（如 deepseek-reasoner）自动降级为纯聊天，
-  并切换为“无工具”系统提示词（诚实说明无法获取实时数据）。
-- 带 tools 请求被 API 拒绝（400/参数不支持）时同样自动降级重试。
-- 任何网络/鉴权错误都转成本地化提示文本，不中断界面。
-"""
+"""Run the LLM tool-calling loop and stream UI events."""
 
 import json
 
@@ -59,7 +44,7 @@ def _fallback_chat(profile: dict, messages: list, lang: str):
         yield {"t": "text", "c": chunk}
 
 
-# ─── 工具调用收集与执行 ──────────────────────────────────
+# 工具调用收集与执行
 
 def _collect_stream(resp) -> tuple:
     """收集流式响应：返回 (文本, 工具调用列表)"""
@@ -141,11 +126,11 @@ def _run_tool(call: dict, index: int):
     return name, args, result_to_json(result), chart_html
 
 
-# ─── 主入口 ──────────────────────────────────────────────
+# 主入口
 
 def run_review(profile: dict, report_text: str, lang: str = "en"):
     """
-    V3.4.4 风控复核（分析师→风控二次审阅的第二轮）。
+    风控复核（分析师→风控二次审阅的第二轮）。
 
     不调用任何数据工具：把分析师研报全文交给「风控复核员」角色，
     复核数据支撑、指出缺口与遗漏风险。流式产出文本片段；失败时

@@ -1,6 +1,1 @@
-"""
-Agent Layer
-============
-V3 智能问答层：LLM 多提供商客户端、系统提示词、会话记忆。
-V3.1 只做对话能力；工具调用（V3.2）与报告工作流（V3.3）后续加入。
-"""
+"""LLM clients, prompts, tool execution, and report workflows."""

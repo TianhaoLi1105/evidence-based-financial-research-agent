@@ -1,4 +1,4 @@
-"""V3.4.4 报告增强与风险复核回归测试（mock LLM，无需网络）"""
+"""研究报告与风险复核测试，使用 mock LLM。"""
 import os, sys
 sys.path.insert(0, os.getcwd())
 
@@ -19,13 +19,11 @@ def check(name, cond):
         failures.append(name)
 
 
-# ─── 1) 偏好开关读写 ────────────────────────────────────
 set_deep_review(True)
 check("review toggle set True", get_deep_review() is True)
 set_deep_review(False)
 check("review toggle set False", get_deep_review() is False)
 
-# ─── 2) 提示词：规则 8 强化 ─────────────────────────────
 en, zh = SYSTEM_PROMPTS_TOOLS["en"], SYSTEM_PROMPTS_TOOLS["zh"]
 check("rule8 en has Data Check section", "## Data Check" in en)
 check("rule8 en source tag rule", "(source: stockanalysis)" in en)
@@ -36,7 +34,6 @@ check("rule8 zh source tag rule", "（来源：stockanalysis）" in zh)
 check("rule8 zh risk backed by data", "每条风险必须用对应的数据支撑" in zh)
 check("rule8 zh confidence rating", "高 / 中 / 低" in zh)
 
-# ─── 3) 风控复核提示词 ──────────────────────────────────
 rev_en, rev_zh = REVIEW_SYSTEM_PROMPTS["en"], REVIEW_SYSTEM_PROMPTS["zh"]
 check("review prompt en exists", "## Risk Review" in rev_en)
 check("review prompt en has 4 checks", all(k in rev_en for k in (
@@ -51,7 +48,6 @@ check("review msgs carry report", "研报正文" in msgs[1]["content"])
 msgs_en = build_review_messages("fr", "Report body")   # 未知语言回退 en
 check("review lang fallback", "Report to review" in msgs_en[1]["content"])
 
-# ─── 4) i18n 文案 ───────────────────────────────────────
 for k in ("deep_review_toggle", "deep_review_hint", "deep_review_heading",
           "deep_review_running"):
     check(f"i18n {k} en", bool(t(k, "en")))
@@ -62,7 +58,6 @@ check("i18n deep instructions has Data Check",
 check("i18n deep instructions zh has 数据自检",
       "## 数据自检" in t("deep_analysis_instructions", "zh"))
 
-# ─── 5) executor run_review 流程（mock stream_chat）──────
 calls = {}
 
 
@@ -97,7 +92,6 @@ llmc.stream_chat = err_stream
 out = list(run_review({"api_key": "k", "model": "m"}, "报告", "en"))
 check("run_review error surfaces text", out and "模拟" in out[0]["c"])
 
-# ─── 6) 来源标签渲染 ────────────────────────────────────
 h = _inline("PE 36.2（来源：stockanalysis），52周高位 (Source: tencent)")
 check("zh source tag rendered", '<span class="src-tag">来源：stockanalysis</span>' in h)
 check("en source tag rendered", '<span class="src-tag">Source: tencent</span>' in h)
@@ -107,9 +101,8 @@ print()
 if failures:
     print(f"{len(failures)} FAILURES: {failures}")
     sys.exit(1)
-print("ALL V3.4.4 TESTS PASSED")
+print("ALL TESTS PASSED")
 
-# ─── 7) 修复回归：标题去重 + 弹窗开关 ────────────────────
 from components.chat import _merge_review
 check("merge: model title not duplicated",
       _merge_review("研报", "## 风险复核意见\n\n1. 通过。", "zh").count("## 风险复核意见") == 1)

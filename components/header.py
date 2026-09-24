@@ -59,7 +59,7 @@ def render_header():
         render_api_modal()
 
 
-# ─── 设置弹窗 ────────────────────────────────────────────
+# 设置弹窗
 def render_api_modal():
     """渲染设置弹窗：数据 API / AI 模型 两个标签页"""
     _, m, _ = st.columns([1, 2.5, 1])
@@ -90,7 +90,7 @@ def render_api_modal():
 def _render_prefs_tab():
     """个性化标签页：展示行为学习到的档案（常看股票 / 关注维度），可一键清空"""
     lang = st.session_state.lang
-    # V3.4.4：分析师→风控二次审阅开关
+    # 分析师→风控二次审阅开关
     review_on = st.toggle(
         t("deep_review_toggle", lang), value=get_deep_review(),
         key="deep_review_toggle", help=t("deep_review_hint", lang))
@@ -228,7 +228,7 @@ def _render_llm_tab():
         else:
             st.warning(t("llm_need_fields", lang))
 
-    # ── 已保存模型列表 ──
+    # 已保存模型列表
     st.markdown(
         f'<p style="font-size:.8125rem;font-weight:600;color:{C["text2"]};'
         f'margin:1rem 0 .5rem;">{t("llm_saved_profiles", lang)}</p>',

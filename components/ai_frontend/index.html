@@ -56,7 +56,7 @@
     font-size:12px; font-weight:600; cursor:pointer; transition:background .15s; user-select:none; }
   .input button:hover { background:#409cff; }
 
-  /* ── 话题面板（V3.2.2b）── */
+  /* 话题面板 */
   #btn-threads, #btn-back { width:34px; flex-shrink:0; }
   #btn-back { display:none; }
   #drawer.threads-mode #btn-threads { display:none; }
@@ -268,7 +268,7 @@
     setValue({ action: "close" });
   }
 
-  // 迷你条：收起为一条窄栏（背景页面不受影响，V3.2.2d）
+  // 收起为窄栏，不影响背景页面
   function setMiniMode(open) {
     miniMode = !!open;
     drawerEl.classList.toggle("mini", miniMode);

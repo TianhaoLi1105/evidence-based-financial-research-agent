@@ -1,4 +1,4 @@
-"""V3.3.3 回归：个性化记忆（隐式学习 / 注入 / 设置弹窗）"""
+"""个性化偏好的学习、注入与设置测试。"""
 import json, os, sys, tempfile
 from unittest import mock
 
@@ -24,7 +24,6 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
      mock.patch.object(chat_store, "CHAT_PATH", tmp_chat):
     rel()
 
-    # ── 1. 股票记录：计数 / 去重 / 排序 / 清空 ──
     with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name):
         pref.record_stock("aapl")
         pref.record_stock("AAPL")
@@ -38,7 +37,6 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
     assert not pref.has_profile() and pref.top_stocks() == []
     print("PASS stock memory (count/dedupe/sort/clear)")
 
-    # ── 2. 话题分类：技术面 / 基本面 / 行情 / 混合 ──
     cases = {
         "RSI 和 MACD 怎么看": ["technical"],
         "解释一下PE和市值": ["fundamental"],
@@ -59,7 +57,6 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
     pref.clear()
     print("PASS topic classification (tech/fund/price/mixed)")
 
-    # ── 3. 上下文注入：档案出现在 _context_text ──
     with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name):
         pref.record_stock("NVDA")
         pref.record_stock("AAPL")
@@ -80,7 +77,6 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
     pref.clear()
     print("PASS profile injected into AI context")
 
-    # ── 4. 设置弹窗：个性化标签页渲染 + 清空按钮 ──
     QUOTE = {"symbol": "AAPL", "name": "Apple Inc.", "close": 234.56,
              "change": 2.31, "percent_change": 0.99, "currency": "USD"}
     HIST = [{"datetime": f"2026-01-{i+1:02d}", "open": 100+i, "high": 102+i,
@@ -107,7 +103,6 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
                                      "暂无记录", "No activity recorded yet")), md[-400:]
         print("PASS personalization tab renders in settings modal")
 
-    # ── 5. 分析股票 → 自动记录（隐式学习闭环）──
     with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
          mock.patch.object(chat_store, "CHAT_PATH", tmp_chat), \
          mock.patch("services.stock_service.fetch_data", fake_fetch_data), \
@@ -122,4 +117,4 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
     print("PASS analyze records stock to preferences")
     pref.clear()
 
-print("\nALL V3.3.3 TESTS PASSED")
+print("\nALL TESTS PASSED")

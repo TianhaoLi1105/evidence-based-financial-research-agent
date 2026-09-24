@@ -1,4 +1,4 @@
-"""语言本地记忆回归：初始化恢复 + 切换持久化 + AppTest 端到端"""
+"""语言偏好的恢复、持久化与 AppTest 测试。"""
 import json, os, sys, tempfile
 from unittest import mock
 
@@ -7,7 +7,6 @@ import data.storage as storage
 import services.app_state as app_state
 import components.header as header
 
-# ── 1. 初始化：从配置恢复上次语言 ──
 tmp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
 tmp.write(json.dumps({"api_key": "k1", "lang": "zh", "watchlist": ["AAPL"]}))
 tmp.close()
@@ -44,7 +43,6 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp3.name), \
     assert ss3["lang"] == "en"
 print("PASS init restores saved lang")
 
-# ── 2. 切换语言 → 写入配置 ──
 tmp4 = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
 tmp4.write(json.dumps({"api_key": "k1"}))
 tmp4.close()
@@ -59,7 +57,6 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp4.name), \
     assert ss4["lang"] == "en" and storage.load_config().get("lang") == "en"
 print("PASS next_lang persists")
 
-# ── 3. AppTest：配置 lang=zh → 启动即中文 ──
 import data.chat_store as chat_store
 from streamlit.testing.v1 import AppTest
 tmp_cfg = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)

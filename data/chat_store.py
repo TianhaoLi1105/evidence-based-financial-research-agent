@@ -1,16 +1,4 @@
-"""
-Chat Session Store (V3.2.2a)
-============================
-AI 对话的本地持久化：把聊天记录保存到独立的 chat_history.json，
-刷新页面 / 重启应用后不丢失；一次到位支持多个会话（话题），
-供 3.2.2b 的多会话 UI 使用。
-
-设计要点：
-- 独立文件，不混入 .agent_config.json（避免配置膨胀与读写冲突）
-- 原子写入（临时文件 + os.replace），崩溃也不会写坏
-- 容量保护：单会话最多 MAX_MESSAGES 条，总会话数最多 MAX_SESSIONS
-- 每次读写磁盘（Streamlit rerun 时模块会被重新导入，内存缓存无意义）
-"""
+"""Store bounded chat sessions in session memory or an atomic local file."""
 
 import json
 import os
@@ -30,7 +18,7 @@ DEFAULT_TITLE = "New Chat"
 _LOCK = threading.Lock()
 
 
-# ─── 底层读写（原子） ────────────────────────────────────
+# 底层读写（原子）
 
 def _load() -> dict:
     """读取整个存储；文件缺失/损坏时返回空结构"""
@@ -60,7 +48,7 @@ def _save(store: dict) -> None:
     os.replace(tmp, CHAT_PATH)
 
 
-# ─── 会话元数据 ──────────────────────────────────────────
+# 会话元数据
 
 def default_title(messages: list) -> str:
     """从第一条用户消息生成会话标题（截断为 20 字）"""
@@ -110,7 +98,7 @@ def create_session(title: str = None, messages: list = None) -> dict:
             "title": title or default_title(messages),
             "created_at": now,
             "updated_at": now,
-            "context": None,   # V3.2.2c：话题主题快照（页面模式/股票/周期）
+            "context": None,   # 话题主题快照（页面模式/股票/周期）
             "messages": (messages or [])[-MAX_MESSAGES:],
         }
         store["sessions"].append(sess)
@@ -162,7 +150,7 @@ def clear_session(session_id: str) -> bool:
 
 
 def set_session_context(session_id: str, context: dict) -> bool:
-    """记录会话的主题快照（V3.2.2c：页面模式/股票/周期）"""
+    """记录会话的主题快照（页面模式/股票/周期）"""
     if not session_id:
         return False
     with _LOCK:
@@ -206,7 +194,7 @@ def delete_session(session_id: str) -> bool:
         return True
 
 
-# ─── 当前会话 ────────────────────────────────────────────
+# 当前会话
 
 def get_active_session_id() -> str:
     """返回上次使用的会话 id（无则 None）"""

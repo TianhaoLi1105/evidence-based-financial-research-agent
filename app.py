@@ -18,7 +18,7 @@ from services.stock_service import fetch_data, fetch_compare_data
 from data.preferences import record_stock
 from data.fundamentals import get_fundamentals, valuation_fallback
 
-# ─── 初始化（配置 / session_state / 主题）────────────────
+# 初始化（配置 / session_state / 主题）
 init_app()
 
 # 对比模式的已选股票列表（session_state 持久化）
@@ -29,13 +29,13 @@ if "mode" not in st.session_state:
 if "compare_cached" not in st.session_state:
     st.session_state.compare_cached = None
 
-# ─── 页面结构 ────────────────────────────────────────────
+# 页面结构
 render_header()
 
-# ─── 市场概览（三大指数卡片）──────────────────────────────
+# 市场概览（三大指数卡片）
 render_market_overview()
 
-# ─── 模式切换（单股分析 / 多股对比）──────────────────────
+# 模式切换（单股分析 / 多股对比）
 mode_c1, mode_c2, mode_c3 = st.columns([1.4, 1.2, 4])
 with mode_c1:
     st.button(
@@ -54,9 +54,9 @@ with mode_c2:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ─── 主流程 ──────────────────────────────────────────────
+# 主流程
 if st.session_state.mode == "compare":
-    # ══ 多股对比模式 ══
+    # 多股对比模式
     tickers, period_days, interval, sel_period, compare_btn = render_compare_sidebar()
 
     if compare_btn:
@@ -68,12 +68,12 @@ if st.session_state.mode == "compare":
                     quotes, histories, sources = fetch_compare_data(
                         tickers, period_days, interval,
                     )
-                    # V3.4.1：逐只拉财务深度数据（有本地 24h 缓存，失败不阻断对比）
+                    # 逐只拉财务深度数据（有本地 24h 缓存，失败不阻断对比）
                     fundamentals = {}
                     for tk in tickers:
                         f = get_fundamentals(tk)
                         if f.get("source") != "none":
-                            # V3.4.2：免费 /quote 无市值/PE → 用兜底源补齐财务表估值行
+                            # 免费 /quote 无市值/PE → 用兜底源补齐财务表估值行
                             val = valuation_fallback(tk)
                             f = dict(f, market_cap=val.get("market_cap"),
                                      pe_ratio=val.get("pe_ratio"))
@@ -87,7 +87,7 @@ if st.session_state.mode == "compare":
                     }
                     render_comparison(quotes, histories, sel_period, sources=sources,
                                       fundamentals=fundamentals)
-                    # V3.3.3 个性化记忆：记录对比的每只股票
+                    # 个性化记忆：记录对比的每只股票
                     for tk in tickers:
                         record_stock(tk)
                 except Exception as e:
@@ -115,7 +115,7 @@ if st.session_state.mode == "compare":
         )
 
 else:
-    # ══ 单股分析模式 ══
+    # 单股分析模式
     cfg = render_sidebar()
     # 自选股按钮在 sidebar 内触发后设置 auto_ticker，这里取走
     auto_ticker = st.session_state.pop("auto_ticker", None)
@@ -157,7 +157,7 @@ else:
                         "show_macd": cfg["show_macd"],
                     }
                     render_results(st.session_state.cached)
-                    # V3.3.3 个性化记忆：记录这次分析的股票
+                    # 个性化记忆：记录这次分析的股票
                     record_stock(target)
                 except Exception as e:
                     st.session_state.cached = None
@@ -194,7 +194,7 @@ else:
         render_results(cached)
 
     else:
-        # ── 欢迎页（未查询时）──
+        # 欢迎页（未查询时）
         st.markdown(
             f'<p style="color:{C["text3"]};margin-bottom:2rem;">'
             f'{t("welcome_hint", st.session_state.lang)}</p>',
@@ -214,5 +214,5 @@ else:
             unsafe_allow_html=True,
         )
 
-# ─── AI 助手（右下角悬浮按钮 + 抽屉，组件 iframe 承载）──
+# AI 助手（右下角悬浮按钮 + 抽屉，组件 iframe 承载）
 render_ai_panel()

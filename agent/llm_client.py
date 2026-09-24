@@ -11,7 +11,7 @@ import openai
 
 from i18n import t
 
-# ─── 服务商预设 ─────────────────────────────────────────
+# 服务商预设
 PROVIDER_PRESETS = {
     "deepseek": {
         "label": "DeepSeek",

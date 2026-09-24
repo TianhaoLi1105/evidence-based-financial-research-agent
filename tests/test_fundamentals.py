@@ -1,4 +1,4 @@
-"""V3.4.1 回归：财务深度（三大报表解析 / 双源降级 / 工具合并 / 对比页表格）"""
+"""财务报表解析、数据源降级与对比表格测试。"""
 import json, os, sys, tempfile, time
 from unittest import mock
 
@@ -22,7 +22,6 @@ CACHE_PATCH.start()
 SA_PATCH = mock.patch.object(fund, "_sa_fetch", side_effect=Exception("no net"))
 SA_PATCH.start()
 
-# ── 1. Twelve Data 全量解析（mock 请求，新三端点结构）──
 TD_DATA = {
     "income_statement": [
         {"fiscal_date": "2026-06-30", "quarter": 3, "year": 2026, "sales": 90e9,
@@ -65,7 +64,6 @@ assert len(f["revenue_trend"]) == 4
 assert abs(f["operating_cash_flow"] - 30e9) < 1e6
 print("PASS Twelve Data fundamentals parse (TTM/margins/ROE/trend)")
 
-# ── 1b. _td_request：三端点 URL 正确 + 429 自动重试一次 ──
 from urllib.error import HTTPError
 class FakeResp:
     def __init__(self, payload): self._p = payload
@@ -96,7 +94,6 @@ assert len(td["income_statement"]) == 1 and td["income_statement"][0]["sales"] =
 assert sum(1 for u in td_calls if "balance_sheet" in u) == 2   # 429 → 重试一次
 print("PASS _td_request 3-endpoint URLs + 429 auto-retry")
 
-# ── 1c. stockanalysis.com 解析（mock 页面 HTML，结构与真实页面一致）──
 SA_INC = """
 <table><thead><tr><th>Fiscal Quarter</th><th>Q3 2026</th><th>Q2 2026</th>
 <th>Q1 2026</th><th>Q4 2025</th><th>Q3 2025</th></tr>
@@ -184,7 +181,6 @@ class FakeYfTicker:
 class FakeYf:
     Ticker = FakeYfTicker
 
-# ── 2. yfinance 全量解析（TD 失败 → yfinance 成功）──
 with mock.patch.object(fund, "_td_request", side_effect=Exception("403 paid")), \
      mock.patch.object(fund, "_yf", FakeYf):
     fy = fund.get_fundamentals("MSFT", api_key="free")
@@ -199,7 +195,6 @@ assert len(fy["revenue_trend"]) == 4
 assert fy["operating_cash_flow"] == 30e9 and fy["eps"] == 1.5
 print("PASS yfinance parse (TTM/ratios/trend)")
 
-# ── 3. 新浪摘要解析（TD + yfinance 都不可用 → 新浪）──
 SINA = {"symbol": "aapl", "name": "苹果", "总营业收入": "1000亿", "净利润": "200亿",
         "毛利润": "450亿", "总资产": "3000亿", "总负债": "1800亿", "股东权益": "1200亿",
         "经营现金流量": "150亿", "投资现金流量": "-30亿", "筹资现金流量": "-50亿",
@@ -215,7 +210,6 @@ assert abs(f2["debt_to_equity"] - 1.5) < 0.01    # 1800/1200
 assert f2["eps"] == 1.2 and f2["roe"] == 16.7
 print("PASS Sina summary parse (bilingual keys)")
 
-# ── 4. 双源都失败 → 空模型，不抛异常 ──
 with mock.patch.object(fund, "_td_request", side_effect=Exception("net")), \
      mock.patch.object(fund, "_yf", None), \
      mock.patch.object(fund, "_sina_request", side_effect=Exception("net")):
@@ -223,7 +217,6 @@ with mock.patch.object(fund, "_td_request", side_effect=Exception("net")), \
 assert f3["source"] == "none" and f3["revenue"] is None and f3["revenue_trend"] == []
 print("PASS graceful empty fallback")
 
-# ── 4b. 新浪「伪成功」（有 source 但字段全空）→ 识别为失败，不返回空壳 ──
 with mock.patch.object(fund, "_td_request", side_effect=Exception("403")), \
      mock.patch.object(fund, "_yf", None), \
      mock.patch.object(fund, "_sina_request", return_value={"symbol": "aapl",
@@ -232,7 +225,6 @@ with mock.patch.object(fund, "_td_request", side_effect=Exception("403")), \
 assert f3b["source"] == "none" and f3b["revenue"] is None
 print("PASS sina pseudo-success detected (falls through, no empty shell)")
 
-# ── 4. 缓存：二次调用不再请求数据源 ──
 with mock.patch.object(fund, "CACHE_DIR", tmp_cache), \
      mock.patch.object(fund, "_td_request", return_value=TD_DATA) as td:
     a = fund.get_fundamentals("ORCL", api_key="k")
@@ -240,7 +232,6 @@ with mock.patch.object(fund, "CACHE_DIR", tmp_cache), \
 assert a == b and td.call_count == 1  # 第二次命中缓存，不再请求
 print("PASS fundamentals disk cache (24h)")
 
-# ── 4c. 空壳缓存（历史伪成功的全空结果）→ 视为无效，删除并重新抓取 ──
 os.makedirs(tmp_cache, exist_ok=True)
 empty_shell = fund._empty("NVDA", "sina")   # source 有值但核心字段全空
 with open(fund._cache_path("NVDA"), "w") as f:
@@ -252,7 +243,6 @@ assert fc["source"] == "twelvedata-fundamentals"   # 未命中空壳缓存，重
 assert fc["revenue"] is not None and fc["net_income"] is not None
 print("PASS empty shell cache ignored (re-fetch)")
 
-# ── 5. tool_get_financials 合并估值 + 财务深度 ──
 FAKE_FUND = {"source": "sina", "revenue": 390e9, "net_income": 95e9,
              "gross_margin": 43.0, "net_margin": 24.0,
              "revenue_growth_yoy": 6.5, "net_income_growth_yoy": 9.0,
@@ -274,7 +264,6 @@ assert out["current_ratio"] == 1.2 and out["operating_cash_flow"] == 110e9
 assert out["source"] == "sina"
 print("PASS get_financials merges valuation + deep fundamentals")
 
-# ── 5b. stockanalysis 主页概况解析（公司简介/行业/板块/员工/官网 + 市值/PE）──
 SA_MAIN = """
 <html><body>
 <h2 class="mb-2">About NVDA</h2>
@@ -310,7 +299,6 @@ assert abs(sp["market_cap"] - 5.42e12) < 1e9
 assert abs(sp["pe_ratio"] - 34.3) < 0.01
 print("PASS stockanalysis profile parse (description/sector/employees + market cap/PE)")
 
-# ── 5c. valuation_fallback：腾讯失败 → stockanalysis 兜底 ──
 with mock.patch.object(fund, "_from_stockanalysis_profile",
                        return_value={"market_cap": 5.42e12, "pe_ratio": 34.3}), \
      mock.patch("data.fallback_data.get_fallback_quote", side_effect=Exception("no tencent")):
@@ -322,8 +310,7 @@ with mock.patch("data.fallback_data.get_fallback_quote",
 assert v2["market_cap"] == 5.21e12 and v2["pe_ratio"] == 33.9 and v2["source"] == "tencent"
 print("PASS valuation_fallback (tencent → stockanalysis)")
 
-# ── 5d. tool_get_profile：/profile 403 → stockanalysis 概况补齐 ──
-# V3.4.4 重构：兜底逻辑在 services.stock_service.profile_with_fallback，
+# 重构：兜底逻辑在 services.stock_service.profile_with_fallback，
 # mock 目标改为 stock_service 模块符号。
 import services.stock_service as _ss
 SA_PROFILE = {"source": "stockanalysis", "name": None, "exchange": "NASDAQ",
@@ -343,7 +330,6 @@ assert prof["employees"] == 42000.0 and prof["description"].startswith("NVIDIA")
 assert prof["source"] == "stockanalysis"
 print("PASS tool_get_profile falls back to stockanalysis (no 403 crash)")
 
-# ── 5e. tool_get_financials：TD quote 无 PE/市值 → valuation_fallback 补齐 ──
 with mock.patch.object(at, "get_statistics", side_effect=Exception("403")), \
      mock.patch.object(at, "_quote_with_fallback",
                        return_value=({"pe_ratio": None, "market_cap": None}, "twelvedata")), \
@@ -356,7 +342,6 @@ with mock.patch.object(at, "get_statistics", side_effect=Exception("403")), \
 assert fin["market_cap"] == 5.21e12 and fin["pe_ratio"] == 34.3
 print("PASS tool_get_financials fills market cap / PE from fallback")
 
-# ── 6. 对比页财务表格（AppTest 真实渲染）──
 QUOTE = {"symbol": "AAPL", "name": "Apple Inc.", "close": 234.56, "change": 2.31,
          "percent_change": 0.99, "currency": "USD",
          "fifty_two_week": {"high": 260.0}, "exchange": "NASDAQ"}
@@ -407,4 +392,4 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
 
 CACHE_PATCH.stop()
 SA_PATCH.stop()
-print("\nALL V3.4.1 TESTS PASSED")
+print("\nALL TESTS PASSED")

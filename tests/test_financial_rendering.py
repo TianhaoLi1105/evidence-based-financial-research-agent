@@ -1,4 +1,4 @@
-"""V3.4.5 收尾增强回归测试：页面深度财务表 + 多股估值对比 52 周位置"""
+"""财务表格与多股估值位置的渲染测试。"""
 import os, sys
 sys.path.insert(0, os.getcwd())
 
@@ -18,7 +18,6 @@ def check(name, cond):
         failures.append(name)
 
 
-# ─── 1) i18n 新键 ───────────────────────────────────────
 for k, en, zh in (("fin_net_income_growth", "Net income YoY", "净利同比"),
                   ("fin_total_assets", "Total assets", "总资产"),
                   ("fin_total_liabilities", "Total liabilities", "总负债"),
@@ -26,7 +25,6 @@ for k, en, zh in (("fin_net_income_growth", "Net income YoY", "净利同比"),
                   ("fin_eps", "EPS", "每股收益")):
     check(f"i18n {k}", t(k, "en") == en and t(k, "zh") == zh)
 
-# ─── 2) _deep_financial_rows 格式 ────────────────────────
 SAMPLE = {"deep_fundamentals": {"source": "stockanalysis",
     "revenue": 1.3e11, "net_income": 6.3e10, "gross_margin": 72.5,
     "net_margin": 48.5, "revenue_growth_yoy": 15.2, "net_income_growth_yoy": 12.1,
@@ -49,7 +47,6 @@ check("missing fields skipped",
       _deep_financial_rows({"deep_fundamentals": {"source": "x", "revenue": 1}}, "zh")
       == [("营收（TTM）", "$1")])
 
-# ─── 3) render_financials 走深度财务分支（mock st）───────
 captured = {}
 class FakeDf:
     def __init__(self, data, **kw):
@@ -75,7 +72,6 @@ with mock.patch.object(cards, "pd") as mpd, \
 check("fallback branch still works", captured.get("dataframe_called")
       and len(captured.get("rows", [])) == 6)
 
-# ─── 4) fetch_data 附加 deep_fundamentals ────────────────
 with mock.patch.object(ss, "get_fundamentals",
                        return_value={"source": "stockanalysis", "revenue": 1e11}), \
      mock.patch.object(ss, "get_statistics", return_value={}), \
@@ -90,7 +86,6 @@ check("fetch_data carries deep_fundamentals",
 check("fetch_data get_fundamentals failure tolerated",
       True)  # 上面 mock 成功路径；失败路径由 try/except 保证（静态）
 
-# ─── 5) compare 工具：52 周位置（含 clamp）──────────────
 def fake_fcd(tks, days, interval):
     quotes = {
         "AAPL": {"name": "Apple", "close": 245.3, "pe_ratio": 36.2,
@@ -115,7 +110,6 @@ check("TSLA clamp at 100 (above range)", d["TSLA"]["price_position_52w_pct"] == 
 check("compare keeps pe/mcap", d["AAPL"]["pe_ratio"] == 36.2
       and d["AAPL"]["market_cap"] == 3.7e12)
 
-# ─── 6) 提示词规则 10 覆盖估值对比 ───────────────────────
 from agent.prompts import SYSTEM_PROMPTS_TOOLS
 en, zh = SYSTEM_PROMPTS_TOOLS["en"], SYSTEM_PROMPTS_TOOLS["zh"]
 check("rule10 en valuation compare", "valuation differences" in en
@@ -126,4 +120,4 @@ print()
 if failures:
     print(f"{len(failures)} FAILURES: {failures}")
     sys.exit(1)
-print("ALL V3.4.5 TESTS PASSED")
+print("ALL TESTS PASSED")

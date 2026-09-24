@@ -168,7 +168,7 @@ def fetch_data(ticker: str, period_days: int, interval: str = "1day"):
 
     profile = profile_with_fallback(ticker)
 
-    # V3.4.5：四源财务深度（Twelve Data → stockanalysis → yfinance → 新浪），
+    # 四源财务深度（Twelve Data → stockanalysis → yfinance → 新浪），
     # 免费 Key 下页面「财务数据」也能展示营收/净利/负债率等完整字段
     try:
         stats["deep_fundamentals"] = get_fundamentals(ticker)

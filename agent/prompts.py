@@ -27,7 +27,7 @@ Rules:
 }
 
 
-# V3.2.1：工具版系统提示词（模型可调用实时数据工具时使用）
+# 工具版系统提示词（模型可调用实时数据工具时使用）
 SYSTEM_PROMPTS_TOOLS = {
     "en": """You are a professional, objective financial research assistant with access to LIVE market data tools.
 
@@ -110,7 +110,7 @@ def build_system_prompt_legacy(lang: str = "en") -> str:
     return build_system_prompt(lang, use_tools=False)
 
 
-# V3.4.4：风控复核角色提示词（分析师→风控二次审阅的第二轮）
+# 风控复核角色提示词（分析师→风控二次审阅的第二轮）
 REVIEW_SYSTEM_PROMPTS = {
     "en": """You are an independent risk review officer at a research desk. You are given a financial research report that an analyst AI just generated from live data tools. Review it critically and output a section titled "## Risk Review" containing:
 
