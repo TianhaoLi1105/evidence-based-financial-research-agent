@@ -7,10 +7,6 @@ import data.storage as storage
 import data.chat_store as chat_store
 from data.indicators import compute_indicators
 
-REAL_CFG = os.path.join(os.getcwd(), ".agent_config.json")
-with open(REAL_CFG) as f:
-    real_content = f.read()
-
 tmp_cfg = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
 tmp_cfg.write('{"api_key": "test-demo-key", "watchlist": ["AAPL"]}')
 tmp_cfg.close()
@@ -187,8 +183,6 @@ try:
         for p in passed:
             print("  ✓", p)
 finally:
-    with open(REAL_CFG, "w") as f:
-        f.write(real_content)
     if os.path.exists(tmp_cfg.name):
         os.remove(tmp_cfg.name)
-    print("config restored")
+    print("temporary config removed")
