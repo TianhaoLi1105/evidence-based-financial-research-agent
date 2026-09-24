@@ -2,6 +2,8 @@
 
 **English** | [中文](README.md)
 
+[![Regression Tests](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml/badge.svg)](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml)
+
 **A real-data financial research assistant** — enter a ticker to get quotes, fundamentals, news, and AI-generated deep research reports.
 
 Built with [Streamlit](https://streamlit.io). All data comes from **free data sources** with automatic multi-source fallback. It ships with a conversational **AI Agent** (DeepSeek / Qwen / Zhipu GLM / OpenAI / Ollama) that produces professional research reports with per-claim source citations and an independent risk-review pass.
@@ -78,6 +80,8 @@ streamlit run app.py
 
 Open `http://localhost:8501` in your browser.
 
+By default, API keys, model profiles, and chat history are kept only in server memory for the current browser session. Refreshing or restarting requires setup again. This prevents visitors from sharing credentials and conversations. For trusted single-user local use, restore disk persistence with `AGENT_LOCAL_PERSISTENCE=1 streamlit run app.py`. Do not use that mode for multi-user access.
+
 ### 4. Configuration
 - **Data API (optional)**: click `KEY` in the top-right corner → enter a free [Twelve Data](https://twelvedata.com) key. Without one, the app automatically falls back to free sources (Tencent Finance / stockanalysis.com / East Money) — slightly fewer fields, but everything still works.
 - **AI model (optional)**: click `KEY` → the `AI Model` tab → pick a provider and enter your API key. Supported:
@@ -90,6 +94,16 @@ Open `http://localhost:8501` in your browser.
 | OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` |
 | Ollama (local) | `http://localhost:11434/v1` | `qwen2.5` |
 | Custom | any OpenAI-compatible endpoint | — |
+
+### 5. Docker
+
+With Docker Desktop installed, build and start the application with one command:
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:8501`; stop it with `docker compose down`.
 
 ---
 
@@ -129,10 +143,10 @@ Every result carries a `source` field; failures degrade silently, missing fields
 
 ## ✅ Testing
 
-The project maintains 16 regression test groups (tool layer, fallback chains, AI event stream, rendering, memory — all with **mocked data sources, no network needed**):
+The project maintains 18 regression test groups (tool layer, fallback chains, AI event stream, rendering, memory, and evaluation — all with **mocked data sources, no network needed**):
 
 ```bash
-bash tests/run_all.sh        # run all 16 groups at once
+bash tests/run_all.sh        # run all 18 groups at once
 python tests/test_v343.py    # run a single group (e.g. valuation)
 ```
 
@@ -143,13 +157,28 @@ python tests/test_v343.py    # run a single group (e.g. valuation)
 | `tests/test_v33_*.py` | context enhancement, chart persistence, personalized memory |
 | `tests/test_v341.py` – `test_v345.py` | fundamentals, news sentiment, valuation, report/risk review, wrap-up |
 | `tests/test_lang_mem.py` / `test_chat_store.py` | language memory, multi-topic storage |
+| `tests/test_security_provenance.py` / `test_evaluation.py` | session isolation, provenance, evaluation data and metrics |
+
+### Real agent evaluation
+
+`evals/tool_routing_cases.jsonl` contains 54 Chinese and English questions: six for each of nine tools, with `expected_tools` annotated on every case. Run it against the locally configured model and real data tools:
+
+**Evaluation protocol:** DeepSeek Chat answers 54 bilingual queries covering nine tools. Tool routing accuracy uses strict exact match: the actual tool set must equal `expected_tools`, and every additional tool call counts as a routing failure.
+
+```bash
+AGENT_LOCAL_PERSISTENCE=1 python3 scripts/evaluate_agent.py
+```
+
+See [`docs/EVALUATION.md`](docs/EVALUATION.md) for the latest real run. Full per-case results are stored in `evals/results/latest.json`.
+
+GitHub Actions runs all 18 offline regression groups and builds the Docker image on every push and pull request. The real evaluation is excluded from CI because it calls live LLM/API services, costs money, and may have stochastic results.
 
 ---
 
 ## 🔒 Privacy & Security
 
-- **API keys stay local**: `.agent_config.json` (gitignored — never committed)
-- **Chat history & personal profile stay local**: `chat_history.json`, `.cache/` (both gitignored)
+- **Session isolation by default**: API keys, model profiles, and chat history live only in the current Streamlit session's server memory, isolated from other visitors
+- **Optional single-user persistence**: `AGENT_LOCAL_PERSISTENCE=1` uses `.agent_config.json` and `chat_history.json` (both gitignored)
 - **No third-party tracking**: the app collects and uploads nothing
 - **Public free endpoints only**: no user privacy data involved
 - **Keys never appear in logs or code**

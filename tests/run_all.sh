@@ -2,6 +2,8 @@
 # 全量回归测试（mock 数据源，无需网络）
 set -e
 cd "$(dirname "$0")/.."
+# Existing integration fixtures intentionally exercise the trusted local disk mode.
+export AGENT_LOCAL_PERSISTENCE=1
 PASS=0; FAIL=0
 for t in tests/test_*.py; do
   echo "=== $t ==="

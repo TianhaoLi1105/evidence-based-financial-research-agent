@@ -2,6 +2,8 @@
 
 **[English](README.en.md) | 中文**
 
+[![Regression Tests](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml/badge.svg)](https://github.com/TianhaoLi1105/evidence-based-financial-research-agent/actions/workflows/tests.yml)
+
 **一个基于真实数据的金融研究助手** —— 输入股票代码，获取行情、财务、新闻与 AI 深度研报。
 
 基于 [Streamlit](https://streamlit.io) 构建，全部数据来自**免费数据源**（多源自动降级），内置可对话的 **AI Agent**（支持 DeepSeek / 通义千问 / 智谱 GLM / OpenAI / Ollama），生成带数据来源标注与风险复核的专业研报。
@@ -78,6 +80,8 @@ streamlit run app.py
 
 浏览器打开 `http://localhost:8501`。
 
+默认情况下，API Key、模型配置和聊天记录仅保存在当前浏览器会话对应的服务器内存中；刷新页面或重启应用后需重新配置。这使不同访问者不会共用密钥和聊天记录。仅在可信的单人本机环境中，如需恢复原有磁盘持久化，可运行 `AGENT_LOCAL_PERSISTENCE=1 streamlit run app.py`。该模式不适合多人访问。
+
 ### 4. 配置
 - **数据 API（可选）**：点击右上角 `KEY` → 填写 [Twelve Data](https://twelvedata.com) 免费 Key。不填时自动使用免费备用源（腾讯财经 / stockanalysis.com / 东财），数据略少但功能可用。
 - **AI 模型（可选）**：点击右上角 `KEY` → `AI 模型` 标签页 → 选择服务商并填入 API Key。支持：
@@ -90,6 +94,16 @@ streamlit run app.py
 | OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` |
 | Ollama（本地） | `http://localhost:11434/v1` | `qwen2.5` |
 | 自定义 | 任意 OpenAI 兼容端点 | — |
+
+### 5. Docker
+
+已安装 Docker Desktop 的情况下，一条命令完成构建并启动：
+
+```bash
+docker compose up --build
+```
+
+浏览器打开 `http://localhost:8501`；停止服务使用 `docker compose down`。
 
 ---
 
@@ -129,10 +143,10 @@ app.py                    # Streamlit 入口：单股分析 / 多股对比 / 市
 
 ## ✅ 测试
 
-项目维护 16 组回归测试（覆盖工具层、降级链路、AI 事件流、渲染、记忆等，全部 **mock 数据源、无需网络**）：
+项目维护 18 组回归测试（覆盖工具层、降级链路、AI 事件流、渲染、记忆和 Evaluation，全部 **mock 数据源、无需网络**）：
 
 ```bash
-bash tests/run_all.sh        # 一键运行全部 16 组
+bash tests/run_all.sh        # 一键运行全部 18 组
 python tests/test_v343.py    # 运行单组（如估值）
 ```
 
@@ -143,14 +157,29 @@ python tests/test_v343.py    # 运行单组（如估值）
 | `tests/test_v33_*.py` | 上下文增强、出图持久化、个性化记忆 |
 | `tests/test_v341.py` ~ `test_v345.py` | 财务深度、新闻情绪、估值、报告/风控、收尾增强 |
 | `tests/test_lang_mem.py` / `test_chat_store.py` | 语言记忆、多话题存储 |
+| `tests/test_security_provenance.py` / `test_evaluation.py` | 会话隔离、来源追踪、评测数据与指标 |
+
+### 真实 Agent Evaluation
+
+`evals/tool_routing_cases.jsonl` 包含 54 条中英文问题，9 个工具各 6 条，每条均标注 `expected_tools`。使用本地已配置的模型和真实数据工具运行：
+
+**评测规则：** DeepSeek Chat 回答 54 条双语问题，覆盖 9 个工具；Tool routing accuracy 使用严格 exact-match，实际工具集合必须与 `expected_tools` 完全相同，任何额外工具调用也计为 routing failure。
+
+```bash
+AGENT_LOCAL_PERSISTENCE=1 python3 scripts/evaluate_agent.py
+```
+
+最新真实运行结果见 [`docs/EVALUATION.md`](docs/EVALUATION.md)，完整逐题结果保存在 `evals/results/latest.json`。
+
+GitHub Actions 每次 push 和 pull request 自动运行 18 组离线回归测试并构建 Docker 镜像。真实 Evaluation 不在 CI 中运行，因为它会调用真实 LLM/API、产生费用，结果也可能存在随机性。
 
 
 ---
 
 ## 🔒 隐私与安全
 
-- **API Key 仅存本地**：`.agent_config.json`（已被 `.gitignore` 排除，不会提交到仓库）
-- **聊天历史与个性化档案仅存本地**：`chat_history.json`、`.cache/`（均已排除）
+- **默认会话隔离**：API Key、模型配置和聊天历史只保存在当前 Streamlit 会话的服务器内存中，不同访问者互不可见
+- **单人本机持久化可选**：设置 `AGENT_LOCAL_PERSISTENCE=1` 后使用 `.agent_config.json` 和 `chat_history.json`（均已被 `.gitignore` 排除）
 - **无第三方追踪**：应用不收集、不上传任何用户数据
 - **数据源均为公开免费接口**：不涉及用户隐私信息
 - **密钥永不出现在日志或代码中**
