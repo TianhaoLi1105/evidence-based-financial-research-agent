@@ -197,4 +197,4 @@ def render_price_chart(hist: list, indicators: dict, ticker: str,
     if show_rsi:
         fig.update_yaxes(title_text="RSI", range=[0, 100], row=row, col=1)
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")

@@ -155,7 +155,7 @@ def render_financials(stats: dict):
                 columns=[t("indicator", st.session_state.lang),
                          t("value", st.session_state.lang)],
             ),
-            use_container_width=True, hide_index=True,
+            width="stretch", hide_index=True,
         )
     elif stats and _deep_financial_rows(stats, st.session_state.lang):
         # 无 Pro 财报时展示四源深度财务（营收/净利/负债率等）
@@ -165,7 +165,7 @@ def render_financials(stats: dict):
                 columns=[t("indicator", st.session_state.lang),
                          t("value", st.session_state.lang)],
             ),
-            use_container_width=True, hide_index=True,
+            width="stretch", hide_index=True,
         )
     elif stats and stats.get("quote_fallback"):
         # 无 Pro 财报时展示备用源关键估值数据
@@ -188,7 +188,7 @@ def render_financials(stats: dict):
         st.dataframe(
             pd.DataFrame(vrows, columns=[t("indicator", st.session_state.lang),
                                          t("value", st.session_state.lang)]),
-            use_container_width=True, hide_index=True,
+            width="stretch", hide_index=True,
         )
         st.markdown(
             f'<p style="color:{C["text3"]};font-size:.75rem;margin-top:.5rem;">'

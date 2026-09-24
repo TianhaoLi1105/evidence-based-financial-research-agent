@@ -43,7 +43,7 @@ def render_header():
         with btn_row[0]:
             st.button(
                 LANG_LABEL.get(st.session_state.lang, "EN"),
-                key="lang_btn", on_click=next_lang, use_container_width=True,
+                key="lang_btn", on_click=next_lang, width="stretch",
             )
         with btn_row[1]:
             st.button(
@@ -52,7 +52,7 @@ def render_header():
                 on_click=lambda: setattr(
                     st.session_state, "show_api",
                     not st.session_state.get("show_api", False)),
-                use_container_width=True,
+                width="stretch",
             )
 
     if st.session_state.show_api:
@@ -83,7 +83,7 @@ def render_api_modal():
 
         st.button(
             t("close", st.session_state.lang), key="modal_close",
-            use_container_width=True,
+            width="stretch",
             on_click=lambda: setattr(st.session_state, "show_api", False))
 
 
@@ -163,7 +163,7 @@ def _render_data_api_tab():
         )
 
     if st.button(t("save", lang), key="modal_save", type="primary",
-                 use_container_width=True):
+                 width="stretch"):
         new_key = api_input.strip()
         if new_key and new_key != st.session_state.api_key:
             st.session_state.api_key = new_key
@@ -213,7 +213,7 @@ def _render_llm_tab():
     )
 
     if st.button(t("llm_save", lang), key="llm_save_btn", type="primary",
-                 use_container_width=True):
+                 width="stretch"):
         if name.strip() and model.strip() and api_key.strip():
             upsert_llm_profile({
                 "name": name.strip(),
@@ -264,9 +264,9 @@ def _render_llm_tab():
             )
         with c2:
             if st.button(t("llm_use", lang), key=f"llm_use_{p.get('id')}",
-                         use_container_width=True):
+                         width="stretch"):
                 set_active_llm_profile_id(p.get("id", ""))
         with c3:
             if st.button(t("llm_delete", lang), key=f"llm_del_{p.get('id')}",
-                         use_container_width=True):
+                         width="stretch"):
                 delete_llm_profile(p.get("id", ""))

@@ -40,14 +40,14 @@ mode_c1, mode_c2, mode_c3 = st.columns([1.4, 1.2, 4])
 with mode_c1:
     st.button(
         t("mode_single", st.session_state.lang),
-        key="mode_single_btn", use_container_width=True,
+        key="mode_single_btn", width="stretch",
         type="primary" if st.session_state.mode == "single" else "secondary",
         on_click=lambda: setattr(st.session_state, "mode", "single"),
     )
 with mode_c2:
     st.button(
         t("mode_compare", st.session_state.lang),
-        key="mode_compare_btn", use_container_width=True,
+        key="mode_compare_btn", width="stretch",
         type="primary" if st.session_state.mode == "compare" else "secondary",
         on_click=lambda: setattr(st.session_state, "mode", "compare"),
     )

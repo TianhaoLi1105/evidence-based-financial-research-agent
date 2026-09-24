@@ -69,7 +69,7 @@ def render_normalized_chart(histories: dict, period_label: str):
         legend=dict(orientation="h", yanchor="top", y=-0.18,
                     font=dict(color=C["text2"])),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def render_metrics_table(quotes: dict):
@@ -95,7 +95,7 @@ def render_metrics_table(quotes: dict):
         rows[t("compare_exchange", st.session_state.lang)][tk] = q.get("exchange", "N/A")
 
     df = pd.DataFrame(rows).T
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width="stretch")
 
 
 def _fmt_money(v):
@@ -158,7 +158,7 @@ def render_financials_table(fundamentals: dict):
         rows[t("fin_operating_cash_flow", lang)][tk] = _fmt_money(ocf)
 
     df = pd.DataFrame(rows).T
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width="stretch")
 
 
 def _source_label(source: str) -> str:

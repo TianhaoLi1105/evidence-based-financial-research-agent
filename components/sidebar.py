@@ -66,10 +66,10 @@ def _render_watchlist(mode: str):
         with c1:
             label = f"{name}" if name != tk else tk
             if mode == "single":
-                st.button(label, key=f"watch_{tk}", use_container_width=True,
+                st.button(label, key=f"watch_{tk}", width="stretch",
                           on_click=_select_watch, args=(tk,))
             else:
-                if st.button(label, key=f"watch_{tk}", use_container_width=True):
+                if st.button(label, key=f"watch_{tk}", width="stretch"):
                     _select_watch_compare(tk)
         with c2:
             if st.button("✕", key=f"watch_rm_{tk}",
@@ -171,7 +171,7 @@ def render_sidebar() -> dict:
         # 加入自选股
         if ticker and ticker not in _watchlist():
             if st.button(t("add_watch", st.session_state.lang),
-                         use_container_width=True):
+                         width="stretch"):
                 _add_watch(ticker)
 
         _render_watchlist("single")
@@ -214,7 +214,7 @@ def render_compare_sidebar():
             placeholder=t("compare_add_placeholder", st.session_state.lang),
         ).strip().upper()
         if st.button(t("compare_add_btn", st.session_state.lang),
-                     use_container_width=True) and new_ticker:
+                     width="stretch") and new_ticker:
             if new_ticker not in st.session_state.compare_tickers:
                 st.session_state.compare_tickers.append(new_ticker)
 
