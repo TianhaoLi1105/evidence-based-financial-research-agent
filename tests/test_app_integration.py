@@ -1,4 +1,6 @@
 """AI 抽屉与设置弹窗的 AppTest 集成测试。"""
+
+from pathlib import Path
 import os, sys, tempfile
 from unittest import mock
 
@@ -76,7 +78,7 @@ try:
         }])
         storage.set_active_llm_profile_id("preset001")
 
-        at = AppTest.from_file("app.py", default_timeout=60)
+        at = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=60)
 
         at.run()
         check("no exception on boot", not at.exception, str(at.exception))

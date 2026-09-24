@@ -1,4 +1,6 @@
 """个性化偏好的学习、注入与设置测试。"""
+
+from pathlib import Path
 import json, os, sys, tempfile
 from unittest import mock
 
@@ -91,7 +93,7 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
          mock.patch("services.stock_service.fetch_data", fake_fetch_data), \
          mock.patch("services.stock_service.fetch_indices", fake_indices):
         from streamlit.testing.v1 import AppTest
-        at = AppTest.from_file("app.py", default_timeout=60)
+        at = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=60)
         at.run()
         at.button(key="api_btn").click(); at.run()
         assert not at.exception, [str(e) for e in at.exception]
@@ -107,7 +109,7 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
          mock.patch.object(chat_store, "CHAT_PATH", tmp_chat), \
          mock.patch("services.stock_service.fetch_data", fake_fetch_data), \
          mock.patch("services.stock_service.fetch_indices", fake_indices):
-        at2 = AppTest.from_file("app.py", default_timeout=60)
+        at2 = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=60)
         at2.run()
         at2.text_input(key="ticker_input_widget").set_value("AAPL"); at2.run()
         [b for b in at2.button if b.label in ("Analyze", "开始分析")][0].click(); at2.run()

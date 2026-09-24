@@ -1,4 +1,6 @@
 """兜底出图：模型只回文字不调工具时，系统直接生成图表（真实链路复现）"""
+
+from pathlib import Path
 import os, sys, tempfile
 from unittest import mock
 
@@ -40,7 +42,7 @@ try:
         storage.set_active_llm_profile_id("preset001")
 
         sid = chat_store.create_session()["id"]
-        at = AppTest.from_file("app.py", default_timeout=60)
+        at = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=60)
         at.session_state["chat_session_loaded"] = True
         at.session_state["chat_session_id"] = sid
         at.session_state["show_chat"] = True

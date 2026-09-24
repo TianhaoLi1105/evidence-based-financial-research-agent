@@ -1,4 +1,6 @@
 """财务报表解析、数据源降级与对比表格测试。"""
+
+from pathlib import Path
 import json, os, sys, tempfile, time
 from unittest import mock
 
@@ -370,7 +372,7 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
      mock.patch("services.stock_service.fetch_indices", fake_indices), \
      mock.patch.object(fund, "get_fundamentals", fake_compare_fund):
     from streamlit.testing.v1 import AppTest
-    at2 = AppTest.from_file("app.py", default_timeout=60)
+    at2 = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=60)
     at2.run()
     at2.button(key="mode_compare_btn").click(); at2.run()
     tinputs = at2.text_input

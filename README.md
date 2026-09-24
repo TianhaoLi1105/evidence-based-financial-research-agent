@@ -61,7 +61,7 @@ python scripts/capture_screenshots.py   # requires playwright
 ## Quick Start
 
 ### 1. Requirements
-- Python **3.9+**
+- Python **3.10+**
 - An LLM API Key (optional — charting works without it; the AI Agent is unlocked once configured)
 
 ### 2. Install dependencies

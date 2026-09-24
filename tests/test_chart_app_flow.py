@@ -1,5 +1,7 @@
 """AppTest：真实链路复现——用户在 AI 框发画图消息，
 mock run_agent 产出 tool 事件(含图表HTML) + 文本，检查最终渲染的 HTML 里有图表。"""
+
+from pathlib import Path
 import os, sys, tempfile
 from unittest import mock
 
@@ -39,7 +41,7 @@ try:
         }])
         storage.set_active_llm_profile_id("preset001")
 
-        at = AppTest.from_file("app.py", default_timeout=60)
+        at = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=60)
         # 预置：AI 框已打开、会话已加载、最后一条是用户画图消息
         at.session_state["chat_session_loaded"] = True
         at.session_state["show_chat"] = True

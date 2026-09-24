@@ -61,7 +61,7 @@ python scripts/capture_screenshots.py   # 需要先安装 playwright
 ## 快速开始
 
 ### 1. 环境要求
-- Python **3.9+**
+- Python **3.10+**
 - 一个 LLM API Key（可选，不配置也能用行情分析；配置后解锁 AI Agent）
 
 ### 2. 安装依赖

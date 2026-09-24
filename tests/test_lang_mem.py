@@ -1,4 +1,6 @@
 """语言偏好的恢复、持久化与 AppTest 测试。"""
+
+from pathlib import Path
 import json, os, sys, tempfile
 from unittest import mock
 
@@ -75,7 +77,7 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
                                 "provider": "deepseek", "model": "deepseek-chat",
                                 "api_key": "sk", "base_url": "https://api.deepseek.com/v1"}])
     storage.set_active_llm_profile_id("p1")
-    at = AppTest.from_file("app.py", default_timeout=60)
+    at = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=60)
     at.run()
     assert at.session_state["lang"] == "zh", at.session_state["lang"]
     assert any("金融研究助手" in str(m.value) for m in at.markdown), "应为中文标题"

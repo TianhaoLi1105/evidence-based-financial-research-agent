@@ -1,4 +1,6 @@
 """深度分析的意图识别、界面与报告下载测试。"""
+
+from pathlib import Path
 import base64, json, os, sys, tempfile
 from unittest import mock
 
@@ -167,7 +169,7 @@ with mock.patch.object(storage, "CONFIG_PATH", tmp_cfg.name), \
         "model": "deepseek-chat", "api_key": "sk-preset",
         "base_url": "https://api.deepseek.com/v1"}])
     storage.set_active_llm_profile_id("p1")
-    at = AppTest.from_file("app.py", default_timeout=60)
+    at = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=60)
     at.run()
     at.session_state["show_chat"] = True
     at.run()
