@@ -24,19 +24,25 @@ def _cache_path(ticker: str, interval: str, period_days: int) -> str:
 
 def get_cached_time_series(ticker: str, interval: str, period_days: int) -> list:
     """读取未过期的缓存 K 线；无缓存或过期返回 None"""
+    record = get_cached_time_series_record(ticker, interval, period_days)
+    return record.get("rows") if record else None
+
+
+def get_cached_time_series_record(ticker: str, interval: str, period_days: int):
+    """Return rows plus original provider and fetch time when available."""
     try:
         with open(_cache_path(ticker, interval, period_days)) as f:
             data = json.load(f)
         age = time.time() - data.get("ts", 0)
         if age > TTL.get(interval, 3600):
             return None
-        return data.get("rows")
+        return data
     except (FileNotFoundError, json.JSONDecodeError, OSError):
         return None
 
 
 def set_cached_time_series(ticker: str, interval: str, period_days: int,
-                           rows: list) -> None:
+                           rows: list, source: str = None) -> None:
     """写入缓存（原子替换）"""
     if not rows:
         return
@@ -44,7 +50,7 @@ def set_cached_time_series(ticker: str, interval: str, period_days: int,
     tmp = f"{path}.tmp"
     try:
         with open(tmp, "w") as f:
-            json.dump({"ts": time.time(), "rows": rows}, f)
+            json.dump({"ts": time.time(), "rows": rows, "source": source}, f)
         os.replace(tmp, path)
     except OSError:
         pass

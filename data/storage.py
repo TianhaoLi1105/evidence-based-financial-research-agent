@@ -7,6 +7,7 @@ Local Config Storage
 import json
 import os
 import uuid
+from data.session_scope import private_state
 
 # 项目根目录下的配置文件
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".agent_config.json")
@@ -14,6 +15,9 @@ CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".agent_c
 
 def load_config() -> dict:
     """读取本地配置，文件不存在或损坏时返回空字典"""
+    state = private_state()
+    if state is not None:
+        return dict(state.get("_agent_config", {}))
     try:
         with open(CONFIG_PATH) as f:
             return json.load(f)
@@ -25,6 +29,10 @@ def save_config(data: dict) -> None:
     """合并保存配置到本地 JSON 文件（保留已有字段）"""
     merged = load_config()
     merged.update(data)
+    state = private_state()
+    if state is not None:
+        state["_agent_config"] = merged
+        return
     with open(CONFIG_PATH, "w") as f:
         json.dump(merged, f)
 

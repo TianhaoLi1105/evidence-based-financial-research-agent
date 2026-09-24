@@ -8,8 +8,10 @@ Financial Data Module
 import urllib.request
 import urllib.error
 import json as _json
+from contextvars import ContextVar
 
 API_KEY = "demo"
+_REQUEST_KEY = ContextVar("twelve_data_api_key", default=None)
 BASE_URL = "https://api.twelvedata.com"
 
 
@@ -17,13 +19,18 @@ def set_api_key(key: str):
     """全局设置 API Key"""
     global API_KEY
     API_KEY = key
+    _REQUEST_KEY.set(key)
+
+
+def get_api_key() -> str:
+    return _REQUEST_KEY.get() or API_KEY
 
 
 def _request(endpoint: str, params: dict = None) -> dict:
     """发送 API 请求并解析 JSON 响应"""
     if params is None:
         params = {}
-    params["apikey"] = API_KEY
+    params["apikey"] = get_api_key()
     query = "&".join(f"{k}={v}" for k, v in params.items())
     url = f"{BASE_URL}/{endpoint}?{query}"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})

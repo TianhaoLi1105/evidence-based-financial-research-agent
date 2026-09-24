@@ -18,7 +18,7 @@ from data.finance_data import (
 from data.fallback_data import (
     get_fallback_time_series, get_fallback_quote, get_fallback_indices,
 )
-from data.cache import get_cached_time_series, set_cached_time_series
+from data.cache import get_cached_time_series_record, set_cached_time_series
 from data.fundamentals import _from_stockanalysis_profile, get_fundamentals
 from data.indicators import compute_indicators
 
@@ -52,9 +52,9 @@ def _time_series_with_fallback(ticker: str, outputsize: int,
 
     返回 (rows, source)，source ∈ {"cache", "twelvedata", "tencent"}
     """
-    cached = get_cached_time_series(ticker, interval, outputsize)
-    if cached:
-        return _ensure_ascending(cached), "cache"
+    cached = get_cached_time_series_record(ticker, interval, outputsize)
+    if cached and cached.get("rows"):
+        return _ensure_ascending(cached["rows"]), "cache"
 
     try:
         rows = get_time_series(ticker, days=outputsize, interval=interval)
@@ -64,7 +64,7 @@ def _time_series_with_fallback(ticker: str, outputsize: int,
         source = "tencent"
 
     rows = _ensure_ascending(rows)
-    set_cached_time_series(ticker, interval, outputsize, rows)
+    set_cached_time_series(ticker, interval, outputsize, rows, source=source)
     return rows, source
 
 
@@ -80,9 +80,10 @@ def _quote_with_fallback(ticker: str, hist: list = None):
         return get_fallback_quote(ticker, hist), "tencent"
 
 
-def _fallback_stats(quote: dict) -> dict:
+def _fallback_stats(quote: dict, source: str = "tencent") -> dict:
     """从备用报价构建估值数据（免费 Key 无法获取 statistics 时使用）"""
     return {
+        "_source": source,
         "valuations_metrics": {
             "market_capitalization": quote.get("market_cap"),
             "trailing_pe": quote.get("pe_ratio"),

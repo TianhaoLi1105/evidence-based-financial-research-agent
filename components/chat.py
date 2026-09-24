@@ -82,7 +82,7 @@ def _safe_href(m: re.Match) -> str:
     """链接只允许 http/https/mailto，其余协议不生成可点击链接"""
     url = m.group(2)
     if url.lower().startswith(("http://", "https://", "mailto:")):
-        return (f'<a href="{url}" target="_blank" rel="noopener noreferrer">'
+        return (f'<a href="{_html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">'
                 f'{m.group(1)}</a>')
     return m.group(1)
 

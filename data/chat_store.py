@@ -17,6 +17,7 @@ import os
 import threading
 import time
 import uuid
+from data.session_scope import private_state
 
 # 项目根目录下的聊天记录文件
 CHAT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -33,6 +34,10 @@ _LOCK = threading.Lock()
 
 def _load() -> dict:
     """读取整个存储；文件缺失/损坏时返回空结构"""
+    state = private_state()
+    if state is not None:
+        return state.get("_agent_chats", {"version": 1, "active_session_id": None,
+                                          "sessions": []})
     try:
         with open(CHAT_PATH, encoding="utf-8") as f:
             store = json.load(f)
@@ -45,6 +50,10 @@ def _load() -> dict:
 
 def _save(store: dict) -> None:
     """原子写入（先写临时文件再替换）"""
+    state = private_state()
+    if state is not None:
+        state["_agent_chats"] = store
+        return
     tmp = CHAT_PATH + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(store, f, ensure_ascii=False)

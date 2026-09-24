@@ -27,6 +27,7 @@ from data.fundamentals import (
 from data.news import get_news
 from data.valuation import get_valuation
 from data.indicators import compute_indicators
+from data.cache import get_cached_time_series_record
 from components.chart_svg import price_line_svg, candlestick_svg, multi_line_svg
 from utils import safe_float
 
@@ -140,6 +141,9 @@ def tool_get_time_series(ticker: str, days: int = 365,
         "volume": safe_float(r.get("volume")),
     } for r in rows[-RECENT_BARS:]]
 
+    cache_record = (get_cached_time_series_record(
+        tk, interval, _outputsize_for_interval(days, interval))
+        if source == "cache" else None)
     return {
         "symbol": tk,
         "interval": interval,
@@ -157,6 +161,8 @@ def tool_get_time_series(ticker: str, days: int = 365,
                        if rows else None),
         "recent": recent,
         "source": source,
+        "origin_source": (cache_record or {}).get("source") if source == "cache" else source,
+        "fetched_at": (cache_record or {}).get("ts") if source == "cache" else None,
     }
 
 
@@ -174,13 +180,16 @@ def tool_get_financials(ticker: str) -> dict:
     # 免费 Key 拿不到 statistics 时，用备用报价补估值字段
     if not stats:
         try:
-            q, _ = _quote_with_fallback(tk)
+            q, q_source = _quote_with_fallback(tk)
         except Exception:
             q = {}
+            q_source = "unknown"
         if q.get("pe_ratio") is not None or q.get("market_cap") is not None:
-            stats = _fallback_stats(q)
+            stats = _fallback_stats(q, q_source)
 
     out = _extract_financials(tk, stats)
+    field_sources = {k: out["source"] for k, v in out.items()
+                     if k not in ("symbol", "source") and v is not None}
 
     # V3.4.2：免费 Key 的 /quote 不含 PE/市值 → 腾讯备用报价 / stockanalysis 补齐
     if out.get("market_cap") is None or out.get("pe_ratio") is None:
@@ -188,8 +197,10 @@ def tool_get_financials(ticker: str) -> dict:
             val = valuation_fallback(tk)
             if out.get("market_cap") is None and val.get("market_cap") is not None:
                 out["market_cap"] = val["market_cap"]
+                field_sources["market_cap"] = val.get("source") or "valuation-fallback"
             if out.get("pe_ratio") is None and val.get("pe_ratio") is not None:
                 out["pe_ratio"] = val["pe_ratio"]
+                field_sources["pe_ratio"] = val.get("source") or "valuation-fallback"
         except Exception:
             pass
 
@@ -204,8 +215,10 @@ def tool_get_financials(ticker: str) -> dict:
         v = f.get(k)
         if v not in (None, [], ""):
             out[k] = v
+            field_sources[k] = f.get("source") or "unknown"
     if f.get("source") and f["source"] != "none":
         out["source"] = f["source"]
+    out["field_sources"] = field_sources
     return out
 
 
@@ -239,8 +252,9 @@ def _extract_financials(tk: str, stats: dict) -> dict:
         "fifty_two_week_low": safe_float(
             pick("fifty_two_week_low", "52_week_low")
             or _f52(quote_fb)[1]),
-        "source": "twelvedata" if stats.get("valuations_metrics") is not None
-                  else "tencent-fallback",
+        "source": (stats.get("_source") or
+                   ("twelvedata" if stats.get("valuations_metrics") is not None
+                    else "tencent-fallback")),
     }
 
 

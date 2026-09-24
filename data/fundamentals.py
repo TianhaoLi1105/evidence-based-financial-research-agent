@@ -787,7 +787,7 @@ def get_fundamentals(ticker: str, api_key: str = None) -> dict:
     if isinstance(cached, dict):
         return cached
     for fetcher, args, tmo in (
-            (_from_twelvedata, (ticker, api_key or _finance_data.API_KEY), None),
+            (_from_twelvedata, (ticker, api_key or _finance_data.get_api_key()), None),
             (_from_stockanalysis, (ticker,), None),
             (_from_yfinance, (ticker,), 20),
             (_from_sina, (ticker,), None)):
